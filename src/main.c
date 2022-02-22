@@ -2,8 +2,19 @@
 #include <stdlib.h>
 
 #include "fib-hashing.h"
+#include "kmer-mapping.h"
 
 int main() {
+    // k-mer mapping example/test
+    char* kmer = "ACGTGACATGACATAGCAGACATTA";
+    size_t kmerLength = strlen(kmer);
+    size_t kmerCode = mapKMer(kmer, kmerLength);
+    
+    for (size_t i = 0; i < kmerLength; i++) {
+        printf("%c: %lx\n", kmer[i], kmerCode >> (2 * (kmerLength - i - 1)) & 0x3);
+    }
+
+    // Fibonacci hashing/fingerprint example/test
     int hashSize = 8;
     int tableSize = 1 << hashSize;
     int *table = calloc(tableSize, sizeof(int));

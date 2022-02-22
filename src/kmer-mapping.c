@@ -21,15 +21,3 @@ size_t mapKMer(char* kmer, size_t kmerLength) {
 
     return kmerCode;
 }
-
-int main() {
-    char* kmer = "ACGTGACATGACATAGCAGACATTA";
-    size_t kmerLength = strlen(kmer);
-    size_t kmerCode = mapKMer(kmer, kmerLength);
-    
-    for (size_t i = 0; i < kmerLength; i++) {
-        printf("%c: %lx\n", kmer[i], kmerCode >> (2 * (kmerLength - i - 1)) & 0x3);
-    }
-
-    return 0;
-}
