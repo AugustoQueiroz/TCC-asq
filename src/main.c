@@ -1,3 +1,4 @@
+// $ gcc main.c fib-hashing.c kmer-mapping.c
 #include <stdio.h>
 #include <stdlib.h>
 
