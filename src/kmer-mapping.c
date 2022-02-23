@@ -21,3 +21,14 @@ size_t mapKMer(char* kmer, size_t kmerLength) {
 
     return kmerCode;
 }
+
+char* kMerFromCode(size_t kmerCode, size_t kmerLength) {
+    char* kmer = calloc(kmerLength+1, sizeof(char));
+    for (size_t i = 0; i < kmerLength; i++) {
+        kmer[i] = "ACGT"[kmerCode & 0b11];
+        kmerCode >>= 2;
+    }
+    kmer[kmerLength] = '\0';
+
+    return kmer;
+}
