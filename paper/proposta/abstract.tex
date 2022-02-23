@@ -1,3 +1,11 @@
 \section{Resumo}
 
-Resumo
+A reconstrução de genomas é uma tarefa que requer uso intensivo de memória,
+sendo esse um dos maiores \emph{bottlenecks} para os \emph{assemblers} desenvolvidos para esse fim.
+Um dos principais alvos de otimização para esse tipo de aplicação é a representação do Grafo de de Bruijn (GdB),
+uma vez que essa estrutura é, hoje, amplamente utilizada em \emph{assemblers}, \color{red}e pode chegar a requerer grandes
+quantidades de memória (na ordem de GB)\color{black}. Além disso, muitas das alternativas propostas hoje,
+mesmo quando eficientes em espaço, são de construção estática, requerendo que todas as leituras tenham sido realizadas e
+estejam disponíveis simultâneamente para que a construção do GdB possa acontecer. Neste trabalho, é apresentada uma alternativa
+eficiente em espaço (fazendo uso de $\sim$16 bits/k-mer) que pode ser usada em regime de \emph{data stream},
+permitindo que as leituras não precisem ser armazenadas ao mesmo tempo.
