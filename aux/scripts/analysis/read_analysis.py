@@ -35,9 +35,28 @@ def main(results_folder):
                 }
 
     false_positive_counts = {}
+    hash_fingerprint_pair_counts = {}
+    hash_counts = {}
+    fingerprint_counts = {}
     for alpha in sorted(results):
         false_positive_counts[alpha] = 0
+        hash_fingerprint_pair_counts[alpha] = {}
+        hash_counts[alpha] = {}
+        fingerprint_counts[alpha] = {}
+
         for kmer in results[alpha]:
+            if results[alpha][kmer]['hash_result'] not in hash_counts[alpha]:
+                hash_counts[alpha][results[alpha][kmer]['hash_result']] = 0
+            hash_counts[alpha][results[alpha][kmer]['hash_result']] += 1
+
+            if results[alpha][kmer]['fingerprint'] not in fingerprint_counts[alpha]:
+                fingerprint_counts[alpha][results[alpha][kmer]['fingerprint']] = 0
+            fingerprint_counts[alpha][results[alpha][kmer]['fingerprint']] += 1
+
+            if (results[alpha][kmer]['hash_result'], results[alpha][kmer]['fingerprint']) not in hash_fingerprint_pair_counts[alpha]:
+                hash_fingerprint_pair_counts[alpha][(results[alpha][kmer]['hash_result'], results[alpha][kmer]['fingerprint'])] = 0
+            hash_fingerprint_pair_counts[alpha][(results[alpha][kmer]['hash_result'], results[alpha][kmer]['fingerprint'])] += 1
+
             if (not results[alpha][kmer]['in_read']) and results[alpha][kmer]['query_result'] != 255:
                 false_positive_counts[alpha] += 1
         
