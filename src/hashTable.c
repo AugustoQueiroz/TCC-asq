@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "fib-hashing.h"
-#include "hashTable.h"
+#include "Hashing.h"
+#include "HashTable.h"
 
 void insertIntoHashTable(struct HashTable* hashTable, size_t key) {
     size_t hash = hashTable->hashFunction(key, hashTable->indexSize);

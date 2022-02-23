@@ -3,9 +3,11 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "fib-hashing.h"
+#include "Hashing.h"
 #include "kmer-mapping.h"
-#include "hashTable.h"
+#include "HashTable.h"
+
+#define BUFFER_SIZE 1024
 
 char* getKMerStartingAt(char* sequence, size_t start, size_t kmerLength) {
     char* kmer = malloc(kmerLength + 1);
@@ -15,6 +17,8 @@ char* getKMerStartingAt(char* sequence, size_t start, size_t kmerLength) {
     kmer[kmerLength] = '\0';
     return kmer;
 }
+
+char* shiftKMerWithBase(char* kmer, char base);
 
 int main(int argc, char** argv) {
     // // k-mer mapping example/test
@@ -119,14 +123,66 @@ int main(int argc, char** argv) {
             updateHashTableWithEdges(&hashTable, prevKMerCode, outgoingEdge);
         }
         prevKMerCode = kmerCode;
+        free(kmer);
     }
 
-    // Try all possible k-mers
-    FILE* allKMersLog = fopen("log/all-kmers.log", "w");
-    for (size_t kmerCode = 0; kmerCode < (1 << (2*kmerLength+1)); kmerCode++) {
-        char* kmer = kMerFromCode(kmerCode, kmerLength);
-        fprintf(allKMersLog, "%s: %zu - %zu - %zu - %hhu\n", kmer, kmerCode, fibonacciHash(kmerCode, hashTable.indexSize), fibonacciFingerprint(kmerCode), queryHashTable(&hashTable, kmerCode));
+    // // Try all possible k-mers
+    // FILE* allKMersLog = fopen("log/all-kmers.log", "w");
+    // for (size_t kmerCode = 0; kmerCode < (1 << (2*kmerLength+1)); kmerCode++) {
+    //     char* kmer = kMerFromCode(kmerCode, kmerLength);
+    //     fprintf(allKMersLog, "%s: %zu - %zu - %zu - %hhu\n", kmer, kmerCode, fibonacciHash(kmerCode, hashTable.indexSize), fibonacciFingerprint(kmerCode), queryHashTable(&hashTable, kmerCode));
+    // }
+
+    // Try to reconstruct sequence
+    /// Cheat: Start with the first k-mer
+    char* currentKMer = getKMerStartingAt(read, 0, kmerLength);
+    char** kMersToTest = calloc(BUFFER_SIZE, sizeof(char*));
+    int startPointer = 0;
+    int endPointer = 0;
+    while (currentKMer != NULL) {
+        printf("Testing %s\n", currentKMer);
+        size_t currentKMerCode = mapKMer(currentKMer, kmerLength);
+        uint8_t outgoingEdges = queryHashTable(&hashTable, currentKMerCode);
+
+        if (outgoingEdges != ((uint8_t) -1)){
+            printf("\tFound\n");
+        }
+
+        if (outgoingEdges & 0b1000) {
+            kMersToTest[endPointer] = shiftKMerWithBase(currentKMer, 'A');
+            endPointer = (endPointer + 1) % BUFFER_SIZE;
+        }
+        if (outgoingEdges & 0b0100) {
+            kMersToTest[endPointer] = shiftKMerWithBase(currentKMer, 'C');
+            endPointer = (endPointer + 1) % BUFFER_SIZE;
+        }
+        if (outgoingEdges & 0b0010) {
+            kMersToTest[endPointer] = shiftKMerWithBase(currentKMer, 'G');
+            endPointer = (endPointer + 1) % BUFFER_SIZE;
+        }
+        if (outgoingEdges & 0b0001) {
+            kMersToTest[endPointer] = shiftKMerWithBase(currentKMer, 'T');
+            endPointer = (endPointer + 1) % BUFFER_SIZE;
+        }
+
+        free(currentKMer);
+        currentKMer = NULL;
+        if (startPointer != endPointer) {
+            currentKMer = kMersToTest[startPointer];
+            startPointer = (startPointer + 1) % BUFFER_SIZE;
+        }
     }
 
     return 0;
+}
+
+char* shiftKMerWithBase(char* kmer, char base) {
+    char* shiftedKMer = calloc(strlen(kmer) + 1, sizeof(char));
+    size_t i = 0;
+    for (size_t i = 0; kmer[i+1] != '\0'; i++) {
+        shiftedKMer[i] = kmer[i+1];
+    }
+    shiftedKMer[strlen(kmer)-1] = base;
+    shiftedKMer[strlen(kmer)] = '\0';
+    return shiftedKMer;
 }
