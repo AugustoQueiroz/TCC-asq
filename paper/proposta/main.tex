@@ -4,7 +4,8 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[brazil]{babel}
-\usepackage[style=ieee]{biblatex}
+% \usepackage[style=ieee]{biblatex}
+\usepackage{natbib}
 \usepackage[a4paper, total={6in, 8in}]{geometry}
 \usepackage{graphicx}
 \usepackage{amsmath}
@@ -17,7 +18,7 @@
 \usepackage{xcolor}
 \usepackage{indentfirst}
 
-%% \addbibresource{library.bib}
+\setcitestyle{iee, open{(}, close{)}}
 
 \graphicspath{ {figures/} }
 
@@ -31,6 +32,10 @@
     \include{posAval}
     \newpage
     \include{cronograma}
+    \newpage
+    \nocite{*}
+    \bibliographystyle{IEEEtran}
+    \bibliography{referencias}
     \newpage
     \include{assinaturas}
 \end{document}
