@@ -16,7 +16,7 @@ char* getKMerStartingAt(char* sequence, size_t start, size_t kmerLength) {
     return kmer;
 }
 
-int main() {
+int main(int argc, char** argv) {
     // // k-mer mapping example/test
     // char* kmer = "ACGTGACATGACATAGCAGACATTA";
     // size_t kmerLength = strlen(kmer);
@@ -68,8 +68,7 @@ int main() {
     // updateHashTableWithEdges(&hashTable, 0, 0b0101);
     // updateHashTableWithEdges(&hashTable, 1, 0b1001);
 
-    double alpha = 0;
-    scanf("%lf", &alpha);
+    double alpha = atof(argv[1]);
 
     // Generate random reading
     char bases[] = "ACGT";
