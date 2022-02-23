@@ -38,7 +38,7 @@ def main(results_folder):
     for alpha in sorted(results):
         false_positive_counts[alpha] = 0
         for kmer in results[alpha]:
-            if results[alpha][kmer]['in_read'] and results[alpha][kmer]['query_result'] != 255:
+            if (not results[alpha][kmer]['in_read']) and results[alpha][kmer]['query_result'] != 255:
                 false_positive_counts[alpha] += 1
         
         print('False positive count (alpha = {}): {}'.format(alpha, false_positive_counts[alpha]))
