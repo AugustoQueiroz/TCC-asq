@@ -4,7 +4,7 @@
 
 size_t mapKMer(char* kmer, size_t kmerLength) {
     size_t kmerCode = 0;
-    for (size_t i = 0; i < kmerLength; i++) {
+    for (size_t i = 0; kmer[i] != '\0'; i++) {
         kmerCode <<= 2;
         if (kmer[i] == 'A') {
             kmerCode += 0;
@@ -25,7 +25,7 @@ size_t mapKMer(char* kmer, size_t kmerLength) {
 char* kMerFromCode(size_t kmerCode, size_t kmerLength) {
     char* kmer = calloc(kmerLength+1, sizeof(char));
     for (size_t i = 0; i < kmerLength; i++) {
-        kmer[i] = "ACGT"[kmerCode & 0b11];
+        kmer[kmerLength - i - 1] = "ACGT"[kmerCode & 0b11];
         kmerCode >>= 2;
     }
     kmer[kmerLength] = '\0';
