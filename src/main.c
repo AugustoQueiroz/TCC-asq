@@ -7,7 +7,7 @@
 #include "kmer-mapping.h"
 #include "HashTable.h"
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 0xFFFFFF
 
 char* getKMerStartingAt(char* sequence, size_t start, size_t kmerLength) {
     char* kmer = malloc(kmerLength + 1);
@@ -19,6 +19,17 @@ char* getKMerStartingAt(char* sequence, size_t start, size_t kmerLength) {
 }
 
 char* shiftKMerWithBase(char* kmer, char base);
+
+int alreadyVisited(int64_t* visitedKMers, size_t currentKMer) {
+    for (size_t i = 0; i < BUFFER_SIZE; i++) {
+        if (visitedKMers[i] == currentKMer) {
+            return 1;
+        } else if (visitedKMers[i] == -1) {
+            return 0;
+        }
+    }
+    return 0;
+}
 
 int main(int argc, char** argv) {
     // // k-mer mapping example/test
@@ -87,7 +98,6 @@ int main(int argc, char** argv) {
 
     struct HashTable hashTable;
     size_t tableSize = ceil(readLength*(1/alpha));
-    printf("Table size: %zu\n", tableSize);
     hashTable.indexSize = tableSize;
     hashTable.table = calloc(hashTable.indexSize, sizeof(uint8_t));
     hashTable.hashFunction = fibonacciHash;
@@ -126,27 +136,35 @@ int main(int argc, char** argv) {
         free(kmer);
     }
 
-    // // Try all possible k-mers
-    // FILE* allKMersLog = fopen("log/all-kmers.log", "w");
-    // for (size_t kmerCode = 0; kmerCode < (1 << (2*kmerLength+1)); kmerCode++) {
-    //     char* kmer = kMerFromCode(kmerCode, kmerLength);
-    //     fprintf(allKMersLog, "%s: %zu - %zu - %zu - %hhu\n", kmer, kmerCode, fibonacciHash(kmerCode, hashTable.indexSize), fibonacciFingerprint(kmerCode), queryHashTable(&hashTable, kmerCode));
-    // }
+    // Try all possible k-mers
+    FILE* allKMersLog = fopen("log/all-kmers.log", "w");
+    for (size_t kmerCode = 0; kmerCode < (1 << (2*kmerLength)); kmerCode++) {
+        char* kmer = kMerFromCode(kmerCode, kmerLength);
+        fprintf(allKMersLog, "%s: %zu - %zu - %zu - %hhu\n", kmer, kmerCode, fibonacciHash(kmerCode, hashTable.indexSize), fibonacciFingerprint(kmerCode), queryHashTable(&hashTable, kmerCode));
+    }
 
     // Try to reconstruct sequence
     /// Cheat: Start with the first k-mer
-    char* currentKMer = getKMerStartingAt(read, 0, kmerLength);
+    char* currentKMer;
     char** kMersToTest = calloc(BUFFER_SIZE, sizeof(char*));
-    int startPointer = 0;
-    int endPointer = 0;
-    while (currentKMer != NULL) {
-        printf("Testing %s\n", currentKMer);
+    kMersToTest[0] = getKMerStartingAt(read, 0, kmerLength);
+    int64_t* visitedKMers = calloc(BUFFER_SIZE, sizeof(int64_t));
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+        visitedKMers[i] = -1;
+    }
+    size_t startPointer = 0;
+    size_t endPointer = 1;
+    size_t visitedCount = 0;
+    while (startPointer != endPointer) {
+        currentKMer = kMersToTest[startPointer++];
         size_t currentKMerCode = mapKMer(currentKMer, kmerLength);
-        uint8_t outgoingEdges = queryHashTable(&hashTable, currentKMerCode);
-
-        if (outgoingEdges != ((uint8_t) -1)){
-            printf("\tFound\n");
+        if (alreadyVisited(visitedKMers, currentKMerCode)) {
+            continue;
         }
+        printf("%s: ", currentKMer);
+        visitedKMers[visitedCount++] = currentKMerCode;
+        uint8_t outgoingEdges = queryHashTable(&hashTable, currentKMerCode);
+        printf("%hhu\n", outgoingEdges);
 
         if (outgoingEdges & 0b1000) {
             kMersToTest[endPointer] = shiftKMerWithBase(currentKMer, 'A');
@@ -166,11 +184,6 @@ int main(int argc, char** argv) {
         }
 
         free(currentKMer);
-        currentKMer = NULL;
-        if (startPointer != endPointer) {
-            currentKMer = kMersToTest[startPointer];
-            startPointer = (startPointer + 1) % BUFFER_SIZE;
-        }
     }
 
     return 0;
