@@ -2,9 +2,6 @@
 #include <stdio.h>
 
 #include "SequencingSimulator.h"
-#include "Hashing.h"
-#include "kmer-mapping.h"
-#include "CountMin.h"
 
 #define KMER_LENGTH 32
 #define COUNTER_MASK 0xFFFFFFFFFFFFFFF
