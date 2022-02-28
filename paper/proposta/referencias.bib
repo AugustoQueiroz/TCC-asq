@@ -38,3 +38,74 @@
    volume = {27},
    year = {2011},
 }
+
+@generic{Imelfort2009,
+   abstract = {The ability to sequence the DNA of an organism has become one of the most important tools in modern biological research. Until recently, the sequencing of even small model genomes required substantial funds and international collaboration. The development of 'second-generation' sequencing technology has increased the throughput and reduced the cost of sequence generation by several orders of magnitude. These new methods produce vast numbers of relatively short reads, usually at the expense of read accuracy. Since the first commercial second-generation sequencing system was produced by 454 Technologies and commercialised by Roche, several other companies including Illumina, Applied Biosystems, Helicos Biosciences and Pacific Biosciences have joined the competition. Because of the relatively high error rate and lack of assembly tools, short-read sequence technology has mainly been applied to the re-sequencing of genomes. However, some recent applications have focused on the de novo assembly of these data. De novo assembly remains the greatest challenge for DNA sequencing and there are specific problems for second generation sequencing which produces short reads with a high error rate. However, a number of different approaches for short-read assembly have been proposed and some have been implemented in working software. In this review, we compare the current approaches for second-generation genome sequencing, explore the future direction of this technology and the implications for plant genome research. © The Author 2009. Published by Oxford University Press.},
+   author = {Michael Imelfort and David Edwards},
+   doi = {10.1093/bib/bbp039},
+   issn = {14675463},
+   issue = {6},
+   journal = {Briefings in Bioinformatics},
+   keywords = {De novo assembly,Genome sequencing,Illumina,Next generation,Roche 454,Second generation},
+   pages = {609-618},
+   pmid = {19933209},
+   title = {De novo sequencing of plant genomes using second-generation technologies},
+   volume = {10},
+   year = {2009},
+}
+
+@InProceedings{Medvev2007,
+author="Medvedev, Paul
+and Georgiou, Konstantinos
+and Myers, Gene
+and Brudno, Michael",
+editor="Giancarlo, Raffaele
+and Hannenhalli, Sridhar",
+title="Computability of Models for Sequence Assembly",
+booktitle="Algorithms in Bioinformatics",
+year="2007",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="289--301",
+abstract="Graph-theoretic models have come to the forefront as some of the most powerful and practical methods for sequence assembly. Simultaneously, the computational hardness of the underlying graph algorithms has remained open. Here we present two theoretical results about the complexity of these models for sequence assembly. In the first part, we show sequence assembly to be NP-hard under two different models: string graphs and de Bruijn graphs. Together with an earlier result on the NP-hardness of overlap graphs, this demonstrates that all of the popular graph-theoretic sequence assembly paradigms are NP-hard. In our second result, we give the first, to our knowledge, optimal polynomial time algorithm for genome assembly that explicitly models the double-strandedness of DNA. We solve the Chinese Postman Problem on bidirected graphs using bidirected flow techniques and show to how to use it to find the shortest double-stranded DNA sequence which contains a given set of k-long words. This algorithm has applications to sequencing by hybridization and short read assembly.",
+isbn="978-3-540-74126-8"
+}
+
+@article{Chikhi2014,
+   abstract = {The de Bruijn graph plays an important role in bioinformatics, especially in the context of de novo assembly. However, the representation of the de Bruijn graph in memory is a computational bottleneck for many assemblers. Recent papers proposed a navigational data structure approach in order to improve memory usage. We prove several theoretical space lower bounds to show the limitation of these types of approaches. We further design and implement a general data structure (DBGFM) and demonstrate its use on a human whole-genome dataset, achieving space usage of 1.5 GB and a 46% improvement over previous approaches. As part of DBGFM, we develop the notion of frequency-based minimizers and show how it can be used to enumerate all maximal simple paths of the de Bruijn graph using only 43 MB of memory. Finally, we demonstrate that our approach can be integrated into an existing assembler by modifying the ABySS software to use DBGFM.},
+   author = {Rayan Chikhi and Antoine Limasset and Shaun Jackman and Jared Simpson and Paul Medvedev},
+   month = {1},
+   title = {On the representation of de Bruijn graphs},
+   url = {http://arxiv.org/abs/1401.5383},
+   year = {2014},
+}
+
+@article {Pell13272,
+	author = {Pell, Jason and Hintze, Arend and Canino-Koning, Rosangela and Howe, Adina and Tiedje, James M. and Brown, C. Titus},
+	title = {Scaling metagenome sequence assembly with probabilistic de Bruijn graphs},
+	volume = {109},
+	number = {33},
+	pages = {13272--13277},
+	year = {2012},
+	doi = {10.1073/pnas.1121464109},
+	publisher = {National Academy of Sciences},
+	abstract = {Deep sequencing has enabled the investigation of a wide range of environmental microbial ecosystems, but the high memory requirements for de novo assembly of short-read shotgun sequencing data from these complex populations are an increasingly large practical barrier. Here we introduce a memory-efficient graph representation with which we can analyze the k-mer connectivity of metagenomic samples. The graph representation is based on a probabilistic data structure, a Bloom filter, that allows us to efficiently store assembly graphs in as little as 4 bits per k-mer, albeit inexactly. We show that this data structure accurately represents DNA assembly graphs in low memory. We apply this data structure to the problem of partitioning assembly graphs into components as a prelude to assembly, and show that this reduces the overall memory requirements for de novo assembly of metagenomes. On one soil metagenome assembly, this approach achieves a nearly 40-fold decrease in the maximum memory requirements for assembly. This probabilistic graph representation is a significant theoretical advance in storing assembly graphs and also yields immediate leverage on metagenomic assembly.},
+	issn = {0027-8424},
+	URL = {https://www.pnas.org/content/109/33/13272},
+	eprint = {https://www.pnas.org/content/109/33/13272.full.pdf},
+	journal = {Proceedings of the National Academy of Sciences}
+}
+
+@article{Cormode2005,
+   abstract = {We introduce a new sublinear space data structure - the count-min sketch - for summarizing data streams. Our sketch allows fundamental queries in data stream summarization such as point, range, and inner product queries to be approximately answered very quickly; in addition, it can be applied to solve several important problems in data streams such as finding quantiles, frequent items, etc. The time and space bounds we show for using the CM sketch to solve these problems significantly improve those previously known - typically from 1/ε2 to 1/ε in factor. © 2003 Elsevier Inc. All rights reserved.},
+   author = {Graham Cormode and S. Muthukrishnan},
+   doi = {10.1016/j.jalgor.2003.12.001},
+   issn = {01966774},
+   issue = {1},
+   journal = {Journal of Algorithms},
+   month = {4},
+   pages = {58-75},
+   title = {An improved data stream summary: The count-min sketch and its applications},
+   volume = {55},
+   year = {2005},
+}

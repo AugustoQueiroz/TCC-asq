@@ -17,28 +17,33 @@
 \usepackage{csquotes}
 \usepackage{xcolor}
 \usepackage{indentfirst}
+\usepackage{imakeidx}
 
 \bibliographystyle{abbrvnat}
 
 \graphicspath{ {figures/} }
+\makeindex
 
 \begin{document}
 	\include{cover}
 	\newpage
     \clearpage
     \setcounter{page}{1}
+    \tableofcontents
+    \printindex
+    \newpage
     \include{abstract}
-    \newpage
-    \include{contexto}
-    \newpage
-    \include{objetivo}
     \newpage
     \include{posAval}
     \newpage
     \include{cronograma}
     \newpage
+    \include{assinaturas}
+    \newpage
+    \include{contexto}
+    \newpage
+    \include{objetivo}
+    \newpage
     \nocite{*}
     \bibliography{referencias}
-    \newpage
-    \include{assinaturas}
 \end{document}
