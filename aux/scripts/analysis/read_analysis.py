@@ -17,6 +17,8 @@ def main(results_folder):
             kmer = line.strip()
             kmers_in_read.add(kmer)
     
+    print(len(kmers_in_read))
+    
     results = {}
     for result_filename in result_files:
         with open(results_folder + '/' + result_filename) as result_file:
@@ -30,8 +32,7 @@ def main(results_folder):
                     'kmer_code': int(kmer_code),
                     'hash_result': int(hash_result),
                     'fingerprint': int(fingerprint),
-                    'query_result': int(query_result),
-                    'in_read': kmer in kmers_in_read
+                    'query_result': int(query_result)
                 }
 
     false_positive_counts = {}
@@ -57,7 +58,7 @@ def main(results_folder):
                 hash_fingerprint_pair_counts[alpha][(results[alpha][kmer]['hash_result'], results[alpha][kmer]['fingerprint'])] = 0
             hash_fingerprint_pair_counts[alpha][(results[alpha][kmer]['hash_result'], results[alpha][kmer]['fingerprint'])] += 1
 
-            if (not results[alpha][kmer]['in_read']) and results[alpha][kmer]['query_result'] != 255:
+            if kmer not in kmers_in_read and results[alpha][kmer]['query_result'] != 255:
                 false_positive_counts[alpha] += 1
         
         print('False positive count (alpha = {}): {}'.format(alpha, false_positive_counts[alpha]))
