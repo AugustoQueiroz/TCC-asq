@@ -1,5 +1,7 @@
 #include "CountMin.h"
 
+#include <stdio.h>
+
 /**
  * @brief Get the hashes for a given key for all the rows in the CountMin sketch
  * 
@@ -55,13 +57,27 @@ void updateDeBruijnCountMinOutEdges(struct DeBruijnCountMin* dBCM, size_t key, u
  */
 uint64_t queryDeBruijnCountMin(struct DeBruijnCountMin* dBCM, size_t key) {
     size_t* hashes = getHashes(dBCM, key);
-    uint64_t count = 0;
-    uint64_t outEdges = -1;
+    uint64_t count = 0xFFFFFFFFFFFFFFF;
+    uint64_t outEdges = 0xF;
     for (size_t i = 0; i < dBCM->D; i++) {
         size_t hash = hashes[i];
         count = dBCM->table[i][hash] < count ? dBCM->table[i][hash] : count; // Get the minimum count
-        outEdges &= dBCM->table[i][hash] >> 60; // And the intersection of out-edges
+        outEdges &= (dBCM->table[i][hash] >> 60); // And the intersection of out-edges
     }
     free(hashes);
     return count | (outEdges << 60);
+}
+
+/**
+ * @brief Print the table for the de Bruijn CountMin Sketch
+ * 
+ * @param dBCM The sketch to be printed.
+ */
+void dumpTable(struct DeBruijnCountMin* dBCM) {
+    for (size_t i = 0; i < dBCM->D; i++) {
+        for (size_t j = 0; j < dBCM->W; j++) {
+            printf("%llu ", dBCM->table[i][j]);
+        }
+        printf("\n");
+    }
 }
