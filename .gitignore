@@ -1,3 +1,4 @@
 .DS_STORE
 src/build
 src/log
+.vscode/*
