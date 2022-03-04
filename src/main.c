@@ -1,201 +1,94 @@
 // $ gcc main.c fib-hashing.c kmer-mapping.c hashTable.c
+// $ ./a.out <alpha> <K>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
 #include "Hashing.h"
-#include "kmer-mapping.h"
+#include "SequencingSimulator.h"
 #include "HashTable.h"
+#include "kmer-mapping.h"
 
-#define BUFFER_SIZE 0xFFFFFF
-
-char* getKMerStartingAt(char* sequence, size_t start, size_t kmerLength) {
-    char* kmer = malloc(kmerLength + 1);
-    for (size_t i = 0; i < kmerLength; i++) {
-        kmer[i] = sequence[start + i];
-    }
-    kmer[kmerLength] = '\0';
-    return kmer;
-}
-
-char* shiftKMerWithBase(char* kmer, char base);
-
-int alreadyVisited(int64_t* visitedKMers, size_t currentKMer) {
-    for (size_t i = 0; i < BUFFER_SIZE; i++) {
-        if (visitedKMers[i] == currentKMer) {
-            return 1;
-        } else if (visitedKMers[i] == -1) {
-            return 0;
-        }
-    }
-    return 0;
-}
+uint8_t alreadyExplored(size_t* exploredKMers, size_t lastPos, size_t kMerCode);
+uint8_t inArray(size_t value, size_t* array, size_t size);
 
 int main(int argc, char** argv) {
-    // // k-mer mapping example/test
-    // char* kmer = "ACGTGACATGACATAGCAGACATTA";
-    // size_t kmerLength = strlen(kmer);
-    // size_t kmerCode = mapKMer(kmer, kmerLength);
-    
-    // for (size_t i = 0; i < kmerLength; i++) {
-    //     printf("%c: %lx\n", kmer[i], kmerCode >> (2 * (kmerLength - i - 1)) & 0x3);
-    // }
+    srand(0); // Seed for random number generator
 
-    // // Fibonacci hashing/fingerprint example/test
-    // int hashSize = 8;
-    // int tableSize = 1 << hashSize;
-    // int *table = calloc(tableSize, sizeof(int));
-    // FILE* hashingLog = fopen("log/hashing.log", "w");
-    // FILE* fingerprintLog = fopen("log/fingerprint.log", "w");
-    // FILE* collisionLog = fopen("log/collision.log", "w");
+    double alpha = atof(argv[1]); // Load factor received from command line
+    size_t K = sscanf(argv[2], "%zu", &K); // K-mer size received from command line
 
-    // for (int i = 0; i < 1024; i++) {
-    //     size_t key = i;
-    //     size_t hash = fibonacciHash(key, hashSize);
-    //     size_t fingerprint = fibonacciFingerprint(key);
+    // Generate the random ("secret") sequence
+    FILE* sequenceFile = fopen("log/sequence.log", "w");
+    size_t sequenceLength = 1 << 20;
+    char* sequence = generateRandomSequence(sequenceLength);
+    fprintf(sequenceFile, "%s\n", sequence);
+    fclose(sequenceFile);
 
-    //     fprintf(hashingLog, "%d: %zu\n", i, hash); // Print the hashing results
-    //     fprintf(fingerprintLog, "%d: %zu\n", i, fingerprint); // Print the fingerprint results
-    //     table[hash]++; // Count the number of collisions
-    // }
-
-    // for (int i = 0; i < tableSize; i++) {
-    //     fprintf(collisionLog, "%d: %d\n", i, table[i]); // Print the collision counts
-    // }
-
-    // fclose(hashingLog);
-    // fclose(collisionLog);
-    // fclose(fingerprintLog);
-
-    // struct HashTable hashTable;
-    // hashTable.indexSize = 8;
-    // hashTable.table = calloc(hashTable.indexSize, sizeof(size_t));
-    // hashTable.hashFunction = fibonacciHash;
-    // hashTable.fingerprintFunction = fibonacciFingerprint;
-    
-    // for (int i = 0; i < 1024; i++) {
-    //     size_t key = i;
-    //     size_t value = 1 << 7;
-    //     printf("Inserting %zu into table\n", key);
-    //     insertIntoHashTable(&hashTable, key);
-    // }
-
-    // updateHashTableWithEdges(&hashTable, 0, 0b0101);
-    // updateHashTableWithEdges(&hashTable, 1, 0b1001);
-
-    double alpha = atof(argv[1]);
-
-    // Generate random reading
-    char bases[] = "ACGT";
-    size_t readLength = 1024;
-    char* read = calloc(readLength, sizeof(char));
-    for (int i = 0; i < readLength; i++) {
-        read[i] = bases[rand() % 4];
-    }
-
-    // Read k-mers
-    int kmerLength = 8;
-
+    // Initialize the hash table
     struct HashTable hashTable;
-    size_t tableSize = ceil(readLength*(1/alpha));
-    hashTable.indexSize = tableSize;
+    hashTable.indexSize = (size_t) ceil(sequenceLength / alpha);
     hashTable.table = calloc(hashTable.indexSize, sizeof(uint8_t));
     hashTable.hashFunction = fibonacciHash;
     hashTable.fingerprintFunction = fibonacciFingerprint;
-    FILE* readResultsLog = fopen("log/read-results.log", "w");
 
-    size_t prevKMerCode = 0;
-    for (int i = 0; i < readLength - kmerLength; i++) {
-        char* kmer = getKMerStartingAt(read, i, kmerLength);
-        size_t kmerCode = mapKMer(kmer, kmerLength);
-        fprintf(readResultsLog, "%s\n", kmer);
+    // Generate random reads
+    printf("Generating reads and adding them to the hash table...\n");
+    FILE* readsFile = fopen("log/reads.log", "w");
+    size_t readLength = 100;
+    size_t totalReads = ((sequenceLength / 100) * 50);
+    char** initialKMers = calloc(totalReads, sizeof(char*));
+    for (size_t i = 0; i < totalReads; i++) {
+        initialKMers[i] = calloc(K + 1, sizeof(char));
+        printf("%lu / %lu\r", i, totalReads);
+        char* read = getRandomRead(sequence, sequenceLength, readLength);
+        fprintf(readsFile, "%s\n", read);
 
-        insertIntoHashTable(&hashTable, kmerCode);
-        if (i > 0) {
-            uint8_t outgoingEdge = 0;
-            switch(kmer[kmerLength-1]) {
-                case 'A':
-                    outgoingEdge = 0b1000;
-                    break;
-                case 'C':
-                    outgoingEdge = 0b0100;
-                    break;
-                case 'G':
-                    outgoingEdge = 0b0010;
-                    break;
-                case 'T':
-                    outgoingEdge = 0b0001;
-                    break;
-                default:
-                    printf("Error: Invalid base\n");
-                    break;
+        size_t prevCode = 0;
+        for (size_t j = 0; j < readLength - K + 1; j++) {
+            char* kmer = getKMerStartingAt(read, j, K);
+            size_t kmerCode = mapKMer(kmer, K);
+
+            insertIntoHashTable(&hashTable, kmerCode);
+
+            if (j > 0) {
+                switch (kmer[K-1]) {
+                    case 'A':
+                        updateHashTableWithEdges(&hashTable, prevCode, 0b1000);
+                        break;
+                    case 'C':
+                        updateHashTableWithEdges(&hashTable, prevCode, 0b0100);
+                        break;
+                    case 'G':
+                        updateHashTableWithEdges(&hashTable, prevCode, 0b0010);
+                        break;
+                    case 'T':
+                        updateHashTableWithEdges(&hashTable, prevCode, 0b0001);
+                        break;
+                }
+            } else if (j == 0) {
+                strcpy(initialKMers[i], kmer);
             }
-            updateHashTableWithEdges(&hashTable, prevKMerCode, outgoingEdge);
+
+            prevCode = kmerCode;
+            free(kmer);
         }
-        prevKMerCode = kmerCode;
+
+        free(read);
+    }
+    fclose(readsFile);
+
+    // Explore all possible k-mers
+    printf("Exploring all possible k-mers\n");
+    FILE* allKMersResultFile = fopen("log/all-kmers.log", "w");
+    for (size_t kmerCode = 0; kmerCode < ((size_t) 1) << (2*K); kmerCode++) {
+        printf("%zu / %zu\r", kmerCode, ((size_t) 1) << (2*K));
+        char* kmer = kMerFromCode(kmerCode, K);
+        uint8_t outEdges = queryHashTable(&hashTable, kmerCode);
+        fprintf(allKMersResultFile, "%s: %hhu\n", kmer, outEdges);
         free(kmer);
     }
 
-    // Try all possible k-mers
-    FILE* allKMersLog = fopen("log/all-kmers.log", "w");
-    for (size_t kmerCode = 0; kmerCode < (1 << (2*kmerLength)); kmerCode++) {
-        char* kmer = kMerFromCode(kmerCode, kmerLength);
-        fprintf(allKMersLog, "%s: %zu - %zu - %zu - %hhu\n", kmer, kmerCode, fibonacciHash(kmerCode, hashTable.indexSize), fibonacciFingerprint(kmerCode), queryHashTable(&hashTable, kmerCode));
-    }
-
-    // Try to reconstruct sequence
-    /// Cheat: Start with the first k-mer
-    char* currentKMer;
-    char** kMersToTest = calloc(BUFFER_SIZE, sizeof(char*));
-    kMersToTest[0] = getKMerStartingAt(read, 0, kmerLength);
-    int64_t* visitedKMers = calloc(BUFFER_SIZE, sizeof(int64_t));
-    for (int i = 0; i < BUFFER_SIZE; i++) {
-        visitedKMers[i] = -1;
-    }
-    size_t startPointer = 0;
-    size_t endPointer = 1;
-    size_t visitedCount = 0;
-    while (startPointer != endPointer) {
-        currentKMer = kMersToTest[startPointer++];
-        size_t currentKMerCode = mapKMer(currentKMer, kmerLength);
-        if (alreadyVisited(visitedKMers, currentKMerCode)) {
-            continue;
-        }
-        printf("%s: ", currentKMer);
-        visitedKMers[visitedCount++] = currentKMerCode;
-        uint8_t outgoingEdges = queryHashTable(&hashTable, currentKMerCode);
-        printf("%hhu\n", outgoingEdges);
-
-        if (outgoingEdges & 0b1000) {
-            kMersToTest[endPointer] = shiftKMerWithBase(currentKMer, 'A');
-            endPointer = (endPointer + 1) % BUFFER_SIZE;
-        }
-        if (outgoingEdges & 0b0100) {
-            kMersToTest[endPointer] = shiftKMerWithBase(currentKMer, 'C');
-            endPointer = (endPointer + 1) % BUFFER_SIZE;
-        }
-        if (outgoingEdges & 0b0010) {
-            kMersToTest[endPointer] = shiftKMerWithBase(currentKMer, 'G');
-            endPointer = (endPointer + 1) % BUFFER_SIZE;
-        }
-        if (outgoingEdges & 0b0001) {
-            kMersToTest[endPointer] = shiftKMerWithBase(currentKMer, 'T');
-            endPointer = (endPointer + 1) % BUFFER_SIZE;
-        }
-
-        free(currentKMer);
-    }
-
+    free(sequence);
     return 0;
-}
-
-char* shiftKMerWithBase(char* kmer, char base) {
-    char* shiftedKMer = calloc(strlen(kmer) + 1, sizeof(char));
-    size_t i = 0;
-    for (size_t i = 0; kmer[i+1] != '\0'; i++) {
-        shiftedKMer[i] = kmer[i+1];
-    }
-    shiftedKMer[strlen(kmer)-1] = base;
-    shiftedKMer[strlen(kmer)] = '\0';
-    return shiftedKMer;
 }
