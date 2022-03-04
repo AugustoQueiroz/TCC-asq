@@ -1,6 +1,33 @@
 #include "CountMin.h"
+#include "Hashing.h"
 
 #include <stdio.h>
+
+/**
+ * @brief Create a new de Bruijn CountMin sketch
+ * 
+ * @param W The width of the sketch (i.e. the number of columns)
+ * @param D The depth of the sketch (i.e. the number of rows, also the number of hash functions used)
+ * @return A pointer to the new de Bruijn CountMin sketch (dynamically allocated, must be freed!)
+ */
+struct DeBruijnCountMin* createDeBruijnCountMinSketch(size_t W, size_t D) {
+    struct DeBruijnCountMin* sketch = malloc(sizeof(struct DeBruijnCountMin));
+    sketch->W = W;
+    sketch->D = D;
+    sketch->table = malloc(sizeof(uint64_t*) * W);
+    sketch->hashFunctionCoefficients = malloc(D * sizeof(size_t*));
+    sketch->hashFunction = polynomialHashing;
+    for (size_t i = 0; i < D; i++) {
+        // Allocate and initialize the rows of the table to all 0s
+        sketch->table[i] = calloc(W, sizeof(uint64_t));
+
+        // Set the hash function coefficients
+        sketch->hashFunctionCoefficients[i] = malloc(2 * sizeof(size_t));
+        sketch->hashFunctionCoefficients[i][0] = rand() % W;
+        sketch->hashFunctionCoefficients[i][1] = rand() % W;
+    }
+    return sketch;
+}
 
 /**
  * @brief Get the hashes for a given key for all the rows in the CountMin sketch
@@ -12,7 +39,7 @@
 size_t* getHashes(struct DeBruijnCountMin* dBCM, size_t key) {
     size_t* hashes = malloc(dBCM->D * sizeof(size_t));
     for (size_t i = 0; i < dBCM->D; i++) {
-        hashes[i] = dBCM->hashFunctionWithLevel(key, dBCM->W, i);
+        hashes[i] = dBCM->hashFunction(dBCM->hashFunctionCoefficients[i][0], dBCM->hashFunctionCoefficients[i][1], dBCM->W, key);
     }
     return hashes;
 }
