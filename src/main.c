@@ -1,4 +1,6 @@
-// $ gcc main.c fib-hashing.c kmer-mapping.c hashTable.c
+// $ gcc main.c Hashing.c kmer-mapping.c CountMin.c SequencingSimulator.c
+// $ ./a.out <K> <Read Length>
+// Reads can then be passed in with line break between each read, and EOF at the end.
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
