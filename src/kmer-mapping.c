@@ -7,13 +7,13 @@ size_t mapKMer(char* kmer, size_t kmerLength) {
     for (size_t i = 0; kmer[i] != '\0'; i++) {
         kmerCode <<= 2;
         if (kmer[i] == 'A') {
-            kmerCode += 0;
+            kmerCode |= 0;
         } else if (kmer[i] == 'C') {
-            kmerCode += 1;
+            kmerCode |= 1;
         } else if (kmer[i] == 'G') {
-            kmerCode += 2;
+            kmerCode |= 2;
         } else if (kmer[i] == 'T') {
-            kmerCode += 3;
+            kmerCode |= 3;
         } else {
             // Error
         }
