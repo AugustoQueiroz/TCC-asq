@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
         uint8_t previousIsPresent = 0;
         for (size_t i = 0; i < readLength - K + 1; i++) {
             char* kmer = getKMerStartingAt(read, i, K);
-            size_t kmerCode = mapKMer(kmer, K);
+            size_t kmerCode = mapKMer(kmer);
 
             // Increment the count for the k-mer
             incrementDeBruijnCountMin(sketch, kmerCode);

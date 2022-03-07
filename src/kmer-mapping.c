@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-size_t mapKMer(char* kmer, size_t kmerLength) {
+size_t mapKMer(char* kmer) {
     size_t kmerCode = 0;
     for (size_t i = 0; kmer[i] != '\0'; i++) {
         kmerCode <<= 2;
