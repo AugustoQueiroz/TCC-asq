@@ -1,8 +1,6 @@
 #include "CountMin.h"
 #include "Hashing.h"
 
-#include <stdio.h>
-
 /**
  * @brief Create a new de Bruijn CountMin sketch
  * 
@@ -106,5 +104,23 @@ void dumpTable(struct DeBruijnCountMin* dBCM) {
             printf("%llu ", dBCM->table[i][j]);
         }
         printf("\n");
+    }
+}
+
+/**
+ * @brief Save the de Bruijn CountMin sketch to disk
+ * 
+ * @param dBCM A pointer to the de Bruijn CountMin sketch.
+ * @param outputFile The file pointer to which the sketch is to be written.
+ */
+void saveDeBruijnCountMin(struct DeBruijnCountMin* dBCM, FILE* outputFile) {
+    fwrite(&dBCM->W, sizeof(size_t), 1, outputFile);
+    fwrite(&dBCM->D, sizeof(size_t), 1, outputFile);
+    //fwrite(&dBCM->hashFunction, sizeof(void*), 1, outputFile);
+    for (size_t i = 0; i < dBCM->D; i++) {
+        fwrite(dBCM->hashFunctionCoefficients[i], sizeof(size_t), 2, outputFile);
+    }
+    for (size_t i = 0; i < dBCM->D; i++) {
+        fwrite(dBCM->table[i], sizeof(uint64_t), dBCM->W, outputFile);
     }
 }

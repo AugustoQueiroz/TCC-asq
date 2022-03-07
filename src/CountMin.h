@@ -2,6 +2,7 @@
 #define COUNTMIN_H
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #define COUNTER_MASK 0xFFFFFFFFFFFFFFF
 
@@ -16,6 +17,6 @@ struct DeBruijnCountMin* createDeBruijnCountMinSketch(size_t W, size_t D);
 void incrementDeBruijnCountMin(struct DeBruijnCountMin* dBCM, size_t key);
 void updateDeBruijnCountMinOutEdges(struct DeBruijnCountMin* dBCM, size_t key, uint8_t outEdges);
 uint64_t queryDeBruijnCountMin(struct DeBruijnCountMin* dBCM, size_t key);
-void dumpTable(struct DeBruijnCountMin* dBCM);
+void saveDeBruijnCountMin(struct DeBruijnCountMin* dBCM, FILE* outputFile);
 
 #endif
