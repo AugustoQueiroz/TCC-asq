@@ -2,3 +2,4 @@
 src/build
 src/log
 .vscode/*
+*.bin
