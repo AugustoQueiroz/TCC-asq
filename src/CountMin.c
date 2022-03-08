@@ -27,6 +27,17 @@ struct DeBruijnCountMin* createDeBruijnCountMinSketch(size_t W, size_t D) {
     return sketch;
 }
 
+void deleteDeBruijnCountMinSketch(struct DeBruijnCountMin* sketch) {
+    for (size_t i = 0; i < sketch->D; i++) {
+        free(sketch->table[i]);
+        free(sketch->hashFunctionCoefficients[i]);
+    }
+    free(sketch->table);
+    free(sketch->hashFunctionCoefficients);
+    free(sketch->hashFunction);
+    free(sketch);
+}
+
 /**
  * @brief Get the hashes for a given key for all the rows in the CountMin sketch
  * 
