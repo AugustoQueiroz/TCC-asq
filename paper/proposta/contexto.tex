@@ -1,0 +1,33 @@
+\section{Contexto}
+
+As tecnologias de sequenciamento de genomas de segunda geração revolucionaram
+o acesso a pesquisa genomica, reduzindo os custos e esforços necessários para
+esse tipo de estudo\cite{Imelfort2009}. À medida que esse
+tipo de pesquisa se tornou mais acessível, surgiu, também, a importância de 
+desenvolvimento de métodos de reconstrução de sequências de genoma, partindo
+dos dados gerados pelos sistemas de gerenciamento, que fossem mais eficientes.
+A montagem de sequências é um problema \emph{NP-difícil}
+\cite{Medvev2007}, de forma que tentativas de otimização do processo de reconstrução
+não são muito exploradas. Assim, muitos dos esforços de otimização almejaram, então, a
+redução no uso de memória, em particular para a representação de Grafos de \emph{de Bruijn} (GdBs), 
+estrutura que ganhou grande relevância nos \emph{assemblers} baseados nas novas
+tecnologias de sequenciamento\cite{Conway2011}\cite{Chikhi2014} graças ao fato destas
+produzirem uma enorme quantidade de leituras (na ordem de milhões de leituras)
+curtas (normalmente entre 25 e 400bp\footnote{bp, ou \emph{base pairs}, são os
+pares de base $\{A, C, G, T\}$ que compõem uma sequência de DNA}).
+
+Diversas representações para os GdBs já foram propostas\cite{Chikhi2014} visando, principalmente,
+obter uma melhor eficiência em memória enquanto garantem uma maior exatidão da informação
+(pois algumas representações aceitam alguma taxa de falsos positivos em troca de
+um melhor aproveitamento do espaço, como é o caso da representação introduzida em
+\cite{Pell13272}).
+
+Uma perspectiva ainda pouco explorada é a de representações dos GdBs em configuração
+de \emph{data stream}, na qual os dados não são todos disponibilizados simultânemanete,
+sendo adicionados na estrutura a medida que as leituras são realizadas. O único
+trabalho encontrado nesse sentido foi o \emph{assembler} \emph{FastEtch}\cite{Ghosh2016},
+que faz uso de um \emph{sketch} \emph{CountMin}. Esse tipo de
+exploração tem potencial para impactar tanto o requerimento de memória do sistema, quanto
+o desempenho em tempo necessário para a montagem do genoma, uma vez que o sistema poderia
+montar o GdB a medida que as leituras são realizadas, não precisando que todas
+elas sejam armazenadas em disco e disponibilizadas simultâneamente.

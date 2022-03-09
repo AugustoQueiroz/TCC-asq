@@ -5,7 +5,7 @@
 \usepackage[T1]{fontenc}
 \usepackage[brazil]{babel}
 % \usepackage[style=ieee]{biblatex}
-\usepackage{natbib}
+\usepackage[square, numbers]{natbib}
 \usepackage[a4paper, total={6in, 8in}]{geometry}
 \usepackage{graphicx}
 \usepackage{amsmath}
@@ -17,25 +17,33 @@
 \usepackage{csquotes}
 \usepackage{xcolor}
 \usepackage{indentfirst}
+\usepackage{imakeidx}
 
-\setcitestyle{iee, open{(}, close{)}}
+\bibliographystyle{abbrvnat}
 
 \graphicspath{ {figures/} }
+\makeindex
 
 \begin{document}
 	\include{cover}
 	\newpage
     \clearpage
     \setcounter{page}{1}
+    \tableofcontents
+    \printindex
+    \newpage
     \include{abstract}
     \newpage
     \include{posAval}
     \newpage
     \include{cronograma}
     \newpage
-    \nocite{*}
-    \bibliographystyle{IEEEtran}
-    \bibliography{referencias}
-    \newpage
     \include{assinaturas}
+    \newpage
+    \include{contexto}
+    \newpage
+    \include{objetivo}
+    \newpage
+    \nocite{*}
+    \bibliography{referencias}
 \end{document}
