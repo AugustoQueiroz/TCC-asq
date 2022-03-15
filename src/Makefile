@@ -6,10 +6,10 @@ BUILDDIR=build
 
 LIBS=-lm
 
-_DEPS = CountMin.h Hashing.h kmer-mapping.h SequencingSimulator.h
+_DEPS = CountMin.h Hashing.h kmer-mapping.h SequencingSimulator.h mathutils.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = main.o CountMin.o Hashing.o kmer-mapping.o SequencingSimulator.o
+_OBJ = main.o CountMin.o Hashing.o kmer-mapping.o SequencingSimulator.o mathutils.o
 OBJ = $(patsubst %,$(BUILDDIR)/%,$(_OBJ))
 
 $(BUILDDIR)/%.o: %.c $(DEPS)
