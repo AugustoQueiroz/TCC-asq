@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
     size_t readLength; sscanf(argv[2], "%zu", &readLength); // Get read length from CLI
 
     // Initialize the CountMin sketch
-    size_t W = 1 << 20,
+    size_t W = prime_succ(1 << 20), // The width of the sketch is the smallest prime number greater than the expected number of k-mers
            D = 8;
     struct DeBruijnCountMin* sketch = createDeBruijnCountMinSketch(W, D);
 
