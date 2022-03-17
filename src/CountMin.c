@@ -34,7 +34,6 @@ void deleteDeBruijnCountMinSketch(struct DeBruijnCountMin* sketch) {
     }
     free(sketch->table);
     free(sketch->hashFunctionCoefficients);
-    free(sketch->hashFunction);
     free(sketch);
 }
 
