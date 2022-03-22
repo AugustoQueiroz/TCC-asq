@@ -9,16 +9,19 @@ LIBS=-lm
 _DEPS = CountMin.h Hashing.h KMerProcessing.h SequencingSimulator.h mathutils.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = main.o CountMin.o Hashing.o KMerProcessing.o SequencingSimulator.o mathutils.o
-OBJ = $(patsubst %,$(BUILDDIR)/%,$(_OBJ))
+_MAINOBJ = main.o CountMin.o Hashing.o KMerProcessing.o mathutils.o
+MAINOBJ = $(patsubst %,$(BUILDDIR)/%,$(_MAINOBJ))
+
+_SIMULATOROBJ = ReadsGenerator.o SequencingSimulator.o
+SIMULATOROBJ = $(patsubst %,$(BUILDDIR)/%,$(_SIMULATOROBJ))
 
 $(BUILDDIR)/%.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-main: $(OBJ)
+main: $(MAINOBJ)
 	$(CC) -o $(BUILDDIR)/$@ $^ $(CFLAGS) $(LIBS)
 
-simulator: $(BUILDDIR)/ReadsGenerator.o $(BUILDDIR)/SequencingSimulator.o
+simulator: $(SIMULATOROBJ)
 	$(CC) -o $(BUILDDIR)/$@ $^ $(CFLAGS) $(LIBS)
 
 .PHONY: clean
