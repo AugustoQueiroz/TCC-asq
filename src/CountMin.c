@@ -61,8 +61,7 @@ size_t* getHashes(struct DeBruijnCountMin* dBCM, size_t key) {
 void incrementDeBruijnCountMin(struct DeBruijnCountMin* dBCM, size_t key) {
     size_t* hashes = getHashes(dBCM, key);
     for (size_t i = 0; i < dBCM->D; i++) {
-        size_t hash = hashes[i];
-        dBCM->table[i][hash]++;
+        dBCM->table[i][hashes[i]]++;
     }
     free(hashes);
 }
@@ -77,8 +76,7 @@ void incrementDeBruijnCountMin(struct DeBruijnCountMin* dBCM, size_t key) {
 void updateDeBruijnCountMinOutEdges(struct DeBruijnCountMin* dBCM, size_t key, uint8_t outEdges) {
     size_t* hashes = getHashes(dBCM, key);
     for (size_t i = 0; i < dBCM->D; i++) {
-        size_t hash = hashes[i];
-        dBCM->table[i][hash] |= ((uint64_t) outEdges) << 60;
+        dBCM->table[i][hashes[i]] |= ((uint64_t) outEdges) << 60;
     }
     free(hashes);
 }
@@ -95,9 +93,8 @@ uint64_t queryDeBruijnCountMin(struct DeBruijnCountMin* dBCM, size_t key) {
     uint64_t count = 0xFFFFFFFFFFFFFFF;
     uint64_t outEdges = 0xF;
     for (size_t i = 0; i < dBCM->D; i++) {
-        size_t hash = hashes[i];
-        count = dBCM->table[i][hash] < count ? dBCM->table[i][hash] : count; // Get the minimum count
-        outEdges &= (dBCM->table[i][hash] >> 60); // And the intersection of out-edges
+        count = dBCM->table[i][hashes[i]] < count ? dBCM->table[i][hashes[i]] : count; // Get the minimum count
+        outEdges &= (dBCM->table[i][hashes[i]] >> 60); // And the intersection of out-edges
     }
     free(hashes);
     return count | (outEdges << 60);
@@ -108,12 +105,12 @@ uint64_t queryDeBruijnCountMin(struct DeBruijnCountMin* dBCM, size_t key) {
  * 
  * @param dBCM The sketch to be printed.
  */
-void dumpTable(struct DeBruijnCountMin* dBCM) {
+void dumpTable(struct DeBruijnCountMin* dBCM, FILE* dumpFile) {
     for (size_t i = 0; i < dBCM->D; i++) {
         for (size_t j = 0; j < dBCM->W; j++) {
-            printf("%llu ", dBCM->table[i][j]);
+            fprintf(dumpFile, "%llu ", dBCM->table[i][j]);
         }
-        printf("\n");
+        fprintf(dumpFile, "\n");
     }
 }
 

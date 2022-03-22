@@ -6,16 +6,19 @@ size_t mapKMer(char* kmer) {
     size_t kmerCode = 0;
     for (size_t i = 0; kmer[i] != '\0'; i++) {
         kmerCode <<= 2;
-        if (kmer[i] == 'A') {
-            kmerCode += 0;
-        } else if (kmer[i] == 'C') {
-            kmerCode += 1;
-        } else if (kmer[i] == 'G') {
-            kmerCode += 2;
-        } else if (kmer[i] == 'T') {
-            kmerCode += 3;
-        } else {
-            // Error
+        switch (kmer[i]) {
+            case 'A':
+                kmerCode |= 0;
+                break;
+            case 'C':
+                kmerCode |= 1;
+                break;
+            case 'G':
+                kmerCode |= 2;
+                break;
+            case 'T':
+                kmerCode |= 3;
+                break;
         }
     }
 
