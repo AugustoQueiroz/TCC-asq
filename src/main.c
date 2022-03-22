@@ -9,20 +9,22 @@
 #include "kmer-mapping.h"
 #include "CountMin.h"
 #include "SequencingSimulator.h"
+#include "mathutils.h"
 
 #define PRESENCE_THRESHOLD 25
 
 int main(int argc, char** argv) {
-    if (argc != 3) {
-        printf("Usage: ./main <K> <Read Length>\n");
+    if (argc != 5) {
+        printf("Usage: ./main <K> <Read Length> <W> <D>\n");
         return 1;
     }
     size_t K; sscanf(argv[1], "%zu", &K); // Get K from CLI
     size_t readLength; sscanf(argv[2], "%zu", &readLength); // Get read length from CLI
+    size_t W; sscanf(argv[3], "%zu", &W); // Get W from CLI
+    size_t D; sscanf(argv[4], "%zu", &D); // Get D from CLI
 
     // Initialize the CountMin sketch
-    size_t W = prime_succ(1 << 20), // The width of the sketch is the smallest prime number greater than the expected number of k-mers
-           D = 8;
+    // W = prime_succ(1 << 16); // The width of the sketch is the smallest prime number greater than the expected number of k-mers
     struct DeBruijnCountMin* sketch = createDeBruijnCountMinSketch(W, D);
 
     // Start receiving the reads
