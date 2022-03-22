@@ -25,6 +25,7 @@ struct DeBruijnCountMin* createDeBruijnCountMinSketch(size_t W, size_t D) {
         // Set the hash function coefficients
         sketch->hashFunctionCoefficients[i] = malloc(2 * sizeof(size_t));
         sketch->hashFunctionCoefficients[i][0] = rand() % LARGE_PRIME;
+        sketch->hashFunctionCoefficients[i][0] = sketch->hashFunctionCoefficients[i][0] == 0 ? 1 : sketch->hashFunctionCoefficients[i][0];
         sketch->hashFunctionCoefficients[i][1] = rand() % LARGE_PRIME;
     }
     return sketch;
