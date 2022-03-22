@@ -31,6 +31,11 @@ struct DeBruijnCountMin* createDeBruijnCountMinSketch(size_t W, size_t D) {
     return sketch;
 }
 
+/**
+ * @brief Frees the memory allocated to the de Bruijn CountMin sketch
+ * 
+ * @param sketch 
+ */
 void deleteDeBruijnCountMinSketch(struct DeBruijnCountMin* sketch) {
     for (size_t i = 0; i < sketch->D; i++) {
         free(sketch->table[i]);
@@ -105,9 +110,10 @@ uint64_t queryDeBruijnCountMin(struct DeBruijnCountMin* dBCM, size_t key) {
 }
 
 /**
- * @brief Print the table for the de Bruijn CountMin Sketch
+ * @brief Writes the counter table to a file.
  * 
  * @param dBCM The sketch to be printed.
+ * @param dumpFile The file that the table should be written to.
  */
 void dumpTable(struct DeBruijnCountMin* dBCM, FILE* dumpFile) {
     for (size_t i = 0; i < dBCM->D; i++) {

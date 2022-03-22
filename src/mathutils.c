@@ -2,6 +2,14 @@
 
 #include "mathutils.h"
 
+/**
+ * @brief Modular sum of a and b modulo m. Guaranteed to not be clipped by overflow.
+ * 
+ * @param a 
+ * @param b 
+ * @param m 
+ * @return uint64_t 
+ */
 uint64_t mod_sum(uint64_t a, uint64_t b, uint64_t m)
 {
 	a %= m;
@@ -14,7 +22,14 @@ uint64_t mod_sum(uint64_t a, uint64_t b, uint64_t m)
 
 }
 
-
+/**
+ * @brief Modular multiplication of a and b modulo m. Guaranteed to not be clipped by overflow.
+ * 
+ * @param a 
+ * @param b 
+ * @param m 
+ * @return uint64_t 
+ */
 uint64_t mod_mult(uint64_t a, uint64_t b, uint64_t m)
 {
 	uint64_t res = 0;
@@ -37,7 +52,14 @@ uint64_t mod_mult(uint64_t a, uint64_t b, uint64_t m)
 	return res % m;
 }
 
-
+/**
+ * @brief Modular potentiation of a to the power of b modulo m. Guaranteed to not be clipped by overflow.
+ * 
+ * @param b 
+ * @param e 
+ * @param m 
+ * @return uint64_t 
+ */
 uint64_t mod_pow(uint64_t b, uint64_t e, uint64_t m)
 {
 	b = b % m;
@@ -52,18 +74,13 @@ uint64_t mod_pow(uint64_t b, uint64_t e, uint64_t m)
 	return res;
 }
 
-bool naive_is_prime(uint64_t val)
-{
-	if (val < 2) return false;
-	for (uint64_t q=2; q*q <=val; q++) {
-		if (val % q == 0) {
-			return false;
-		}
-	}
-	return true;
-}
-
-
+/**
+ * @brief Determines whether or not n is prime.
+ * 
+ * @param n 
+ * @return true 
+ * @return false 
+ */
 bool is_prime(uint64_t n)
 {
 	uint64_t a[] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37};
@@ -102,7 +119,12 @@ bool is_prime(uint64_t n)
 	return prime;
 }
 
-
+/**
+ * @brief Finds the prime successor of n.
+ * 
+ * @param n 
+ * @return uint64_t 
+ */
 uint64_t prime_succ(uint64_t n)
 {
 	uint64_t firstfew[] = {2,2,2,3,5,5,7};
