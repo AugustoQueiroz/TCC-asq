@@ -1,3 +1,5 @@
+#include <time.h>
+
 #include "CountMin.h"
 #include "Hashing.h"
 
@@ -9,6 +11,7 @@
  * @return A pointer to the new de Bruijn CountMin sketch (dynamically allocated, must be freed!)
  */
 struct DeBruijnCountMin* createDeBruijnCountMinSketch(size_t W, size_t D) {
+    srand(time(NULL));
     struct DeBruijnCountMin* sketch = malloc(sizeof(struct DeBruijnCountMin));
     sketch->W = W;
     sketch->D = D;
