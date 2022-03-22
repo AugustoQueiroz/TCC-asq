@@ -6,9 +6,8 @@
 #include <math.h>
 
 #include "Hashing.h"
-#include "kmer-mapping.h"
+#include "KMerProcessing.h"
 #include "CountMin.h"
-#include "SequencingSimulator.h"
 #include "mathutils.h"
 
 #define PRESENCE_THRESHOLD 25

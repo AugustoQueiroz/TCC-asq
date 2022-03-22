@@ -40,20 +40,3 @@ char* getRandomRead(char* sequence, size_t sequenceLength, size_t readLength) {
     read[readLength] = '\0';
     return read;
 }
-
-/**
- * @brief Gets a substring of length k (@p kmerLength) starting the given position (@p start) in the given read.
- * 
- * @param read The read from which to take the k-mer.
- * @param start The first position to be included in the k-mer.
- * @param kmerLength k; the length of the k-mer.
- * @return char* The k-mer.
- */
-char* getKMerStartingAt(char* read, size_t start, size_t kmerLength) {
-    char* kmer = malloc(kmerLength + 1);
-    for (size_t i = 0; i < kmerLength; i++) {
-        kmer[i] = read[start + i];
-    }
-    kmer[kmerLength] = '\0';
-    return kmer;
-}
