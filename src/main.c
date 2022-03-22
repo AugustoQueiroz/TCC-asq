@@ -70,6 +70,10 @@ int main(int argc, char** argv) {
     printf("Saving sketch to sketch.bin\n");
     FILE* outputFile = fopen("sketch.bin", "wb");
     saveDeBruijnCountMin(sketch, outputFile);
+    fclose(outputFile);
+    FILE* tableFile = fopen("table.txt", "w");
+    dumpTable(sketch, tableFile);
+    fclose(tableFile);
 
     // // Test all k-mers
     printf("Exploring all possible k-mers\n");
@@ -86,6 +90,7 @@ int main(int argc, char** argv) {
         fprintf(allKMersResultFile, "%s: %hhu\n", kmer, outEdges);
         free(kmer);
     }
+    fclose(allKMersResultFile);
 
     // Ending the program
     free(read);
