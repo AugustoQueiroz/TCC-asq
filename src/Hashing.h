@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-#define LARGE_PRIME 18446744073709551557llu
+#define LARGE_PRIME 4294967311l
 #define LARGE_FIB_NUMBER 11400714819323198485llu
 
 size_t polynomialHashing(size_t A, size_t B, size_t indexSize, size_t key);
