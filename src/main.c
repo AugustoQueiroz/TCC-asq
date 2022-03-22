@@ -29,7 +29,9 @@ int main(int argc, char** argv) {
 
     // Start receiving the reads
     char* read = malloc(readLength + 1); // Allocate memory for read
+    size_t readCount = 0;
     while (scanf("%s", read) != EOF) {
+        printf("Current Read: %zu\r", readCount++);
         
         // Get the k-mers from the read
         size_t previousKMer = 0;
@@ -65,6 +67,7 @@ int main(int argc, char** argv) {
             free(kmer);
         }
     }
+    free(read);
 
     // Save the sketch
     printf("Saving sketch to sketch.bin\n");
@@ -75,7 +78,7 @@ int main(int argc, char** argv) {
     dumpTable(sketch, tableFile);
     fclose(tableFile);
 
-    // // Test all k-mers
+    // Test all k-mers
     printf("Exploring all possible k-mers\n");
     FILE* allKMersResultFile = fopen("log/all-kmers.log", "w");
     for (size_t kmerCode = 0; kmerCode < ((size_t) 1) << (2*K); kmerCode++) {
@@ -93,7 +96,6 @@ int main(int argc, char** argv) {
     fclose(allKMersResultFile);
 
     // Ending the program
-    free(read);
     deleteDeBruijnCountMinSketch(sketch);
     return 0;
 }
