@@ -1,6 +1,6 @@
 IDIR = .
 CC=gcc
-CFLAGS=-I$(IDIR)
+CFLAGS=-I$(IDIR) -Wall
 
 BUILDDIR=build
 
@@ -16,6 +16,9 @@ $(BUILDDIR)/%.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 main: $(OBJ)
+	$(CC) -o $(BUILDDIR)/$@ $^ $(CFLAGS) $(LIBS)
+
+simulator: $(BUILDDIR)/ReadsGenerator.o $(BUILDDIR)/SequencingSimulator.o
 	$(CC) -o $(BUILDDIR)/$@ $^ $(CFLAGS) $(LIBS)
 
 .PHONY: clean
