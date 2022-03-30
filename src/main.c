@@ -28,6 +28,7 @@ int main(int argc, char** argv) {
     // Start receiving the reads
     char* read = malloc(readLength + 1); // Allocate memory for read
     size_t readCount = 0;
+    FILE* startingKMersFile = fopen("starting-kmers.txt", "w");
     while (scanf("%s", read) != EOF) {
         printf("Current Read: %zu\r", readCount++);
         
@@ -58,6 +59,8 @@ int main(int argc, char** argv) {
                         updateDeBruijnCountMinOutEdges(sketch, previousKMer, 0b0001);
                         break;
                 }
+            } else if (kmerIsPresent) {
+                fprintf(startingKMersFile, "%s\n", kmer);
             }
 
             previousKMer = kmerCode;
