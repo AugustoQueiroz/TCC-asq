@@ -17,8 +17,8 @@ def map_kmer(kmer):
     return kmer_code
 
 class DeBruijnCountMin:
-    counter_mask = ((1 << 60) - 1) & 0xFFFFFFFFFFFFFFFF
-    out_edges_mask = ~counter_mask & 0xFFFFFFFFFFFFFFFF
+    counter_mask = ((1 << 12) - 1) & 0xFFFF
+    out_edges_mask = ~counter_mask & 0xFFFF
     large_prime = 4294967311
 
     @staticmethod
@@ -35,7 +35,7 @@ class DeBruijnCountMin:
             for i in range(D):
                 row = []
                 for j in range(W):
-                    row.append(int.from_bytes(f.read(8), byteorder='little'))
+                    row.append(int.from_bytes(f.read(2), byteorder='little'))
                 counters.append(row)
 
             sketch.table = counters
@@ -51,12 +51,14 @@ class DeBruijnCountMin:
         return ((x * self.hash_coefficients[i][0]) + self.hash_coefficients[i][1]) % self.large_prime % self.W
     
     def query(self, x):
+        if isinstance(x, str):
+            x = map_kmer(x)
         hashes = [self.hash(x, i) for i in range(self.D)]
         count = min(self.table[i][hashes[i]] & self.counter_mask for i in range(self.D))
-        out_edges = reduce(lambda x, y: x & y, [self.table[i][hashes[i]] & self.out_edges_mask for i in range(self.D)], 15 << 60) >> 60
+        out_edges = reduce(lambda x, y: x & y, [self.table[i][hashes[i]] & self.out_edges_mask for i in range(self.D)], 15 << 12) >> 12
         return count, out_edges
 
-    def get_neighbors(self, kmer):
+    def get_neighbors(self, kmer, presence_threshold=25):
         kmer_code = map_kmer(kmer)
         count, out_edges = self.query(kmer_code)
         base_value = {
@@ -65,15 +67,12 @@ class DeBruijnCountMin:
             'G': 2,
             'T': 3
         }
-        if count > 25:
+        if count >= presence_threshold:
             neighbors = set(kmer[1:] + base for base in base_value if out_edges & (0b1000 >> base_value[base]))
             return neighbors
-        print(f'{kmer} not considered present ({count = })')
         return set()
 
-    def navigate_from(self, kmer, k):
-        KMER_MASK = (1 << (2 * k)) - 1
-
+    def navigate_from(self, kmer):
         visited_kmers = set()
         frontier = {kmer}
         unitig = kmer[:-1]
@@ -87,6 +86,17 @@ class DeBruijnCountMin:
                 frontier.update(neighbors)
             else:
                 return (unitig, neighbors)
+
+    def navigatable_k_mers(self, starting_set, presence_threshold):
+        visited_kmers = {}
+        frontier = starting_set
+        while frontier:
+            current_kmer = frontier.pop()
+            visited_kmers[current_kmer] = self.query(current_kmer)
+            neighbors = self.get_neighbors(current_kmer, presence_threshold)
+            frontier.update(neighbors - set(visited_kmers))
+
+        return visited_kmers
 
     def __repr__(self):
         return f"""
@@ -105,9 +115,12 @@ class DeBruijnCountMin:
         #             count_frequencies[count] = 1
         # print(sorted(count_frequencies))
         # print(sum(count_frequencies.keys()))
-        plt.bar([i for i in range(self.W)], list(map(lambda x: x & self.counter_mask, self.table[0])))
-        plt.show()
-        plt.hist(list(map(lambda x: x & self.counter_mask, self.table[0])), bins=250)
+        # plt.bar([i for i in range(self.W)], list(map(lambda x: x & self.counter_mask, self.table[0])))
+        # plt.show()
+        
+        fig, axs = plt.subplots(self.D, 1, sharex=True)
+        for i in range(self.D):
+            axs[i].hist(list(map(lambda x: x & self.counter_mask, self.table[0])), bins=250)
         plt.show()
         # for i in range(0, self.W, 10):
         #     plt.bar([i for i in range(i, i+10)], list(map(lambda x: x & self.counter_mask, self.table[0][i:i+10])))
@@ -117,18 +130,25 @@ class DeBruijnCountMin:
         #         print(self.table[i][j], end=' ')
         #     print()
 
+    def print_counts(self):
+        for i in range(self.D):
+            for j in range(self.W):
+                print(self.table[i][j] & 0xFFF, end=' ')
+            print()
+
 if __name__ == '__main__':
     sketch = DeBruijnCountMin.from_file('./sketch.bin')
     print(sketch)
-    # sketch.count_frequencies()
-    to_navigate_from = { "CATGAATT" }
-    navigated = set()
-    unitigs = set()
-    while len(to_navigate_from):
-        source = to_navigate_from.pop()
-        navigated.add(source)
-        unitig, neighbors = sketch.navigate_from(source, 8)
-        unitigs.add(unitig)
-        # print(unitig, neighbors)
-        to_navigate_from.update(neighbors - navigated)
-    print(*unitigs, sep='\n')
+    sketch.count_frequencies()
+    sketch.print_counts()
+    # to_navigate_from = { "CATGAATT" }
+    # navigated = set()
+    # unitigs = set()
+    # while len(to_navigate_from):
+    #     source = to_navigate_from.pop()
+    #     navigated.add(source)
+    #     unitig, neighbors = sketch.navigate_from(source, 8)
+    #     unitigs.add(unitig)
+    #     # print(unitig, neighbors)
+    #     to_navigate_from.update(neighbors - navigated)
+    # print(*unitigs, sep='\n')
