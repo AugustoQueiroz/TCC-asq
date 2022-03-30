@@ -21,5 +21,6 @@ void updateDeBruijnCountMinOutEdges(struct DeBruijnCountMin* dBCM, size_t key, u
 uint16_t queryDeBruijnCountMin(struct DeBruijnCountMin* dBCM, size_t key);
 void dumpTable(struct DeBruijnCountMin* dBCM, FILE* dumpFile);
 void saveDeBruijnCountMin(struct DeBruijnCountMin* dBCM, FILE* outputFile);
+struct DeBruijnCountMin* loadDeBruijnCountMin(FILE* inputFile);
 
 #endif
