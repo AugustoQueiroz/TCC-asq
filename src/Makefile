@@ -15,6 +15,9 @@ MAINOBJ = $(patsubst %,$(BUILDDIR)/%,$(_MAINOBJ))
 _SIMULATOROBJ = ReadsGenerator.o SequencingSimulator.o
 SIMULATOROBJ = $(patsubst %,$(BUILDDIR)/%,$(_SIMULATOROBJ))
 
+_TRAVERSALOBJ = CountMin.o Hashing.o KmerProcessing.o mathutils.o
+TRAVERSALOBJ = $(patsubst %,$(BUILDDIR)/%,$(_TRAVERSALOBJ))
+
 $(BUILDDIR)/%.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
@@ -23,6 +26,9 @@ main: $(MAINOBJ)
 
 simulator: $(SIMULATOROBJ)
 	$(CC) -o $(BUILDDIR)/$@ $^ $(CFLAGS) $(LIBS)
+
+traversal: traversal.cpp $(TRAVERSALOBJ)
+	g++ -o $(BUILDDIR)/$@ $^ $(CFLAGS) $(LIBS)
 
 .PHONY: clean
 
