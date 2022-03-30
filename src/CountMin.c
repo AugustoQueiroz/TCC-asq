@@ -15,12 +15,12 @@ struct DeBruijnCountMin* createDeBruijnCountMinSketch(size_t W, size_t D) {
     struct DeBruijnCountMin* sketch = malloc(sizeof(struct DeBruijnCountMin));
     sketch->W = W;
     sketch->D = D;
-    sketch->table = malloc(sizeof(uint64_t*) * W);
+    sketch->table = malloc(sizeof(uint16_t*) * W);
     sketch->hashFunctionCoefficients = malloc(D * sizeof(size_t*));
     sketch->hashFunction = polynomialHashing;
     for (size_t i = 0; i < D; i++) {
         // Allocate and initialize the rows of the table to all 0s
-        sketch->table[i] = calloc(W, sizeof(uint64_t));
+        sketch->table[i] = calloc(W, sizeof(uint16_t));
 
         // Set the hash function coefficients
         sketch->hashFunctionCoefficients[i] = malloc(2 * sizeof(size_t));
@@ -85,7 +85,7 @@ void incrementDeBruijnCountMin(struct DeBruijnCountMin* dBCM, size_t key) {
 void updateDeBruijnCountMinOutEdges(struct DeBruijnCountMin* dBCM, size_t key, uint8_t outEdges) {
     size_t* hashes = getHashes(dBCM, key);
     for (size_t i = 0; i < dBCM->D; i++) {
-        dBCM->table[i][hashes[i]] |= ((uint64_t) outEdges) << 60;
+        dBCM->table[i][hashes[i]] |= ((uint16_t) outEdges) << 12;
     }
     free(hashes);
 }
@@ -97,16 +97,16 @@ void updateDeBruijnCountMinOutEdges(struct DeBruijnCountMin* dBCM, size_t key, u
  * @param key The key to be queried
  * @return uint64_t A 64-bit integer representing the count as well as the out-edges for the given key. The 4 most significant bits represent the out-edges {A, C, G, T}, and the other 60 bits are the counter.
  */
-uint64_t queryDeBruijnCountMin(struct DeBruijnCountMin* dBCM, size_t key) {
+uint16_t queryDeBruijnCountMin(struct DeBruijnCountMin* dBCM, size_t key) {
     size_t* hashes = getHashes(dBCM, key);
-    uint64_t count = 0xFFFFFFFFFFFFFFF;
-    uint64_t outEdges = 0xF;
+    uint16_t count = 0xFFFF;
+    uint16_t outEdges = 0xF;
     for (size_t i = 0; i < dBCM->D; i++) {
         count = dBCM->table[i][hashes[i]] < count ? dBCM->table[i][hashes[i]] : count; // Get the minimum count
-        outEdges &= (dBCM->table[i][hashes[i]] >> 60); // And the intersection of out-edges
+        outEdges &= (dBCM->table[i][hashes[i]] >> 12); // And the intersection of out-edges
     }
     free(hashes);
-    return count | (outEdges << 60);
+    return count | (outEdges << 12);
 }
 
 /**
@@ -118,7 +118,7 @@ uint64_t queryDeBruijnCountMin(struct DeBruijnCountMin* dBCM, size_t key) {
 void dumpTable(struct DeBruijnCountMin* dBCM, FILE* dumpFile) {
     for (size_t i = 0; i < dBCM->D; i++) {
         for (size_t j = 0; j < dBCM->W; j++) {
-            fprintf(dumpFile, "%llu ", dBCM->table[i][j]);
+            fprintf(dumpFile, "%hu ", dBCM->table[i][j]);
         }
         fprintf(dumpFile, "\n");
     }
@@ -138,6 +138,6 @@ void saveDeBruijnCountMin(struct DeBruijnCountMin* dBCM, FILE* outputFile) {
         fwrite(dBCM->hashFunctionCoefficients[i], sizeof(size_t), 2, outputFile);
     }
     for (size_t i = 0; i < dBCM->D; i++) {
-        fwrite(dBCM->table[i], sizeof(uint64_t), dBCM->W, outputFile);
+        fwrite(dBCM->table[i], sizeof(uint16_t), dBCM->W, outputFile);
     }
 }
