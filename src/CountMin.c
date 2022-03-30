@@ -12,18 +12,18 @@
  */
 struct DeBruijnCountMin* createDeBruijnCountMinSketch(size_t W, size_t D) {
     srand(time(NULL));
-    struct DeBruijnCountMin* sketch = malloc(sizeof(struct DeBruijnCountMin));
+    struct DeBruijnCountMin* sketch = (struct DeBruijnCountMin*) malloc(sizeof(struct DeBruijnCountMin));
     sketch->W = W;
     sketch->D = D;
-    sketch->table = malloc(sizeof(uint16_t*) * W);
-    sketch->hashFunctionCoefficients = malloc(D * sizeof(size_t*));
+    sketch->table = (uint16_t**) malloc(sizeof(uint16_t*) * W);
+    sketch->hashFunctionCoefficients = (size_t**) malloc(D * sizeof(size_t*));
     sketch->hashFunction = polynomialHashing;
     for (size_t i = 0; i < D; i++) {
         // Allocate and initialize the rows of the table to all 0s
-        sketch->table[i] = calloc(W, sizeof(uint16_t));
+        sketch->table[i] = (uint16_t*) calloc(W, sizeof(uint16_t));
 
         // Set the hash function coefficients
-        sketch->hashFunctionCoefficients[i] = malloc(2 * sizeof(size_t));
+        sketch->hashFunctionCoefficients[i] = (size_t*) malloc(2 * sizeof(size_t));
         sketch->hashFunctionCoefficients[i][0] = rand() % LARGE_PRIME;
         sketch->hashFunctionCoefficients[i][0] = sketch->hashFunctionCoefficients[i][0] == 0 ? 1 : sketch->hashFunctionCoefficients[i][0];
         sketch->hashFunctionCoefficients[i][1] = rand() % LARGE_PRIME;
@@ -54,7 +54,7 @@ void deleteDeBruijnCountMinSketch(struct DeBruijnCountMin* sketch) {
  * @return size_t* An array of hashes, one for each row in the CountMin sketch.
  */
 size_t* getHashes(struct DeBruijnCountMin* dBCM, size_t key) {
-    size_t* hashes = malloc(dBCM->D * sizeof(size_t));
+    size_t* hashes = (size_t*) malloc(dBCM->D * sizeof(size_t));
     for (size_t i = 0; i < dBCM->D; i++) {
         hashes[i] = dBCM->hashFunction(dBCM->hashFunctionCoefficients[i][0], dBCM->hashFunctionCoefficients[i][1], dBCM->W, key);
     }
@@ -140,4 +140,23 @@ void saveDeBruijnCountMin(struct DeBruijnCountMin* dBCM, FILE* outputFile) {
     for (size_t i = 0; i < dBCM->D; i++) {
         fwrite(dBCM->table[i], sizeof(uint16_t), dBCM->W, outputFile);
     }
+}
+
+struct DeBruijnCountMin* loadDeBruijnCountMin(FILE* inputFile) {
+    struct DeBruijnCountMin* dBCM = (struct DeBruijnCountMin*) malloc(sizeof(struct DeBruijnCountMin));
+    fread(&dBCM->W, sizeof(size_t), 1, inputFile);
+    fread(&dBCM->D, sizeof(size_t), 1, inputFile);
+    dBCM->hashFunction = polynomialHashing;
+    //fread(&dBCM->hashFunction, sizeof(void*), 1, inputFile);
+    dBCM->hashFunctionCoefficients = (size_t**) malloc(dBCM->D * sizeof(size_t*));
+    for (size_t i = 0; i < dBCM->D; i++) {
+        dBCM->hashFunctionCoefficients[i] = (size_t*) malloc(2 * sizeof(size_t));
+        fread(dBCM->hashFunctionCoefficients[i], sizeof(size_t), 2, inputFile);
+    }
+    dBCM->table = (uint16_t**) malloc(dBCM->D * sizeof(uint16_t*));
+    for (size_t i = 0; i < dBCM->D; i++) {
+        dBCM->table[i] = (uint16_t*) malloc(dBCM->W * sizeof(uint16_t));
+        fread(dBCM->table[i], sizeof(uint16_t), dBCM->W, inputFile);
+    }
+    return dBCM;
 }
