@@ -76,23 +76,6 @@ int main(int argc, char** argv) {
     dumpTable(sketch, tableFile);
     fclose(tableFile);
 
-    // Test all k-mers
-    printf("Exploring all possible k-mers\n");
-    FILE* allKMersResultFile = fopen("log/all-kmers.log", "w");
-    for (size_t kmerCode = 0; kmerCode < ((size_t) 1) << (2*K); kmerCode++) {
-        printf("%zu / %zu\r", kmerCode, ((size_t) 1) << (2*K));
-        char* kmer = kMerFromCode(kmerCode, K);
-        uint64_t queryResult = queryDeBruijnCountMin(sketch, kmerCode);
-        uint8_t outEdges = queryResult >> 60;
-        uint64_t count = queryResult & COUNTER_MASK;
-        if (count < PRESENCE_THRESHOLD) {
-            outEdges = -1;
-        }
-        fprintf(allKMersResultFile, "%s: %hhu\n", kmer, outEdges);
-        free(kmer);
-    }
-    fclose(allKMersResultFile);
-
     // Ending the program
     deleteDeBruijnCountMinSketch(sketch);
     return 0;
