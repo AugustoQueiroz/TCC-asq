@@ -10,17 +10,16 @@
 #include "CountMin.h"
 #include "mathutils.h"
 
-#define PRESENCE_THRESHOLD 25
-
 int main(int argc, char** argv) {
-    if (argc != 5) {
-        printf("Usage: ./main <K> <Read Length> <W> <D>\n");
+    if (argc != 6) {
+        printf("Usage: ./main <K> <Read Length> <W> <D> <Presence Threshold>\n");
         return 1;
     }
     size_t K; sscanf(argv[1], "%zu", &K); // Get K from CLI
     size_t readLength; sscanf(argv[2], "%zu", &readLength); // Get read length from CLI
     size_t W; sscanf(argv[3], "%zu", &W); // Get W from CLI
     size_t D; sscanf(argv[4], "%zu", &D); // Get D from CLI
+    size_t PRESENCE_THRESHOLD; sscanf(argv[5], "%zu", &PRESENCE_THRESHOLD); // Get presence threshold from CLI
 
     // Initialize the CountMin sketch
     // W = prime_succ(1 << 16); // The width of the sketch is the smallest prime number greater than the expected number of k-mers
@@ -43,7 +42,7 @@ int main(int argc, char** argv) {
             incrementDeBruijnCountMin(sketch, kmerCode);
 
             // If the k-mer is considered to be present, add out edge to previous k-mer
-            uint8_t kmerIsPresent = (queryDeBruijnCountMin(sketch, kmerCode) & COUNTER_MASK) > PRESENCE_THRESHOLD;
+            uint8_t kmerIsPresent = (queryDeBruijnCountMin(sketch, kmerCode) & COUNTER_MASK) >= PRESENCE_THRESHOLD;
             if (i > 0 && kmerIsPresent) {
                 switch (kmer[K-1]) {
                     case 'A':
