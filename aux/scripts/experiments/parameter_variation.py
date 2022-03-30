@@ -24,6 +24,7 @@ parser.add_argument('-t', '--presence-threshold', type=int, nargs='+', help='The
 
 # ..
 parser.add_argument('-exe', '--executable', type=str, help='The path to the executable to be used.', required=True)
+parser.add_argument('-nexe', '--navigation-executable', type=str, help='The path to the navigation executable to be used.')
 
 # Experiments to Run
 experiments_group = parser.add_argument_group('Experiments to run')
@@ -86,7 +87,12 @@ class Experiment:
         os.system(run_command)
         self.results['sketch'] = DeBruijnCountMin.from_file('sketch.bin')
 
-    def run_navigation_analysis(self):
+    def run_navigation(self, path_to_navigation_exe):
+        run_command = f'{path_to_navigation_exe} {self.k} sketch.bin starting-kmers.txt K{self.k}W{self.W}D{self.D}T{self.presence_threshold}'
+        print(f'Executing: {run_command}')
+        os.system(run_command)
+
+    def something(self):
         actual_kmer_counts = self.dataset_handler.get_k_mer_counts(self.k)
         navigatable_kmers = self.results['sketch'].navigatable_k_mers(set(read[:self.k] for read in self.dataset_handler.get_reads()), self.presence_threshold)
         present_kmers = set(filter(lambda kmer: navigatable_kmers[kmer][0] >= self.presence_threshold, navigatable_kmers))
@@ -142,7 +148,7 @@ class ExperimentSet:
     def run(self):
         for experiment in self.experiments:
             experiment.run(self.args.executable)
-            experiment.run_navigation_analysis()
+            experiment.run_navigation(self.args.navigation_executable)
 
     def save_results(self):
         for experiment in self.experiments:
@@ -154,6 +160,7 @@ if __name__ == '__main__':
     # Make sure all the paths are absolute
     args.synthetic_dataset_generator = os.path.abspath(args.synthetic_dataset_generator)
     args.executable = os.path.abspath(args.executable)
+    args.navigation_executable = os.path.abspath(args.navigation_executable)
     args.output_dir = os.path.abspath(args.output_dir)
 
     # Change working directory to output directory
@@ -163,4 +170,4 @@ if __name__ == '__main__':
 
     experiment_set = ExperimentSet(args, dataset_handler)
     experiment_set.run()
-    experiment_set.save_results()
+    # experiment_set.save_results()
