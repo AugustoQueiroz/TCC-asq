@@ -75,9 +75,6 @@ int main(int argc, char** argv) {
     FILE* outputFile = fopen("sketch.bin", "wb");
     saveDeBruijnCountMin(sketch, outputFile);
     fclose(outputFile);
-    FILE* tableFile = fopen("table.txt", "w");
-    dumpTable(sketch, tableFile);
-    fclose(tableFile);
 
     // Ending the program
     deleteDeBruijnCountMinSketch(sketch);
