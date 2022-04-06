@@ -12,8 +12,6 @@ extern "C" {
 #include "KMerProcessing.h"
 }
 
-#define PRESENCE_THRESHOLD 25
-
 std::string extendKMer(std::string currentKMer, char nextBase) {
   std::string nextKMer = currentKMer.substr(1);
   nextKMer.push_back(nextBase);
@@ -21,14 +19,15 @@ std::string extendKMer(std::string currentKMer, char nextBase) {
 }
 
 int main(int argc, char** argv) {
-    if (argc != 5) {
-        std::cerr << "Usage: " << argv[0] << " <k> <sketch_file> <starting_kmers_file> <output_file>" << std::endl;
+    if (argc != 6) {
+        std::cerr << "Usage: " << argv[0] << " <k> <sketch_file> <starting_kmers_file> <output_file> <presence_threshold>" << std::endl;
         return 1;
     }
     size_t K = std::stoi(argv[1]);
     std::string sketch_fp = argv[2];
     std::ifstream startingKMersFile(argv[3]);
     std::ofstream outputFile(argv[4]);
+    size_t presence_threshold = std::stoi(argv[5]);
 
     // Load the sketch from the file
     std::cout << "Loading sketch from " << sketch_fp << std::endl;
@@ -63,7 +62,7 @@ int main(int argc, char** argv) {
         uint16_t queryResult = queryDeBruijnCountMin(sketch, currentKMerCode);
         outputFile << currentKMer << ": " << (queryResult & COUNTER_MASK) << " " << std::bitset<4>(queryResult >> 12) << std::endl;
 
-        if (queryResult >= PRESENCE_THRESHOLD) {
+        if (queryResult >= presence_threshold) {
             uint8_t outEdges = queryResult >> 12;
             if (outEdges & 0b1000) {
                 std::string nextKMer = extendKMer(currentKMer, 'A');
