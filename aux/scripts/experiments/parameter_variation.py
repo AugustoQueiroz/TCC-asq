@@ -2,6 +2,7 @@ from itertools import product
 
 import os
 import argparse
+import multiprocessing as mp
 
 from DeBruijnCountMin import DeBruijnCountMin
 
@@ -30,6 +31,9 @@ parser.add_argument('-nexe', '--navigation-executable', type=str, help='The path
 experiments_group = parser.add_argument_group('Experiments to run')
 parser.add_argument('-fp', '--false-positive', action='store_true', help='Run the false positive experiment.')
 parser.add_argument('-fn', '--false-negative', action='store_true', help='Run the false negative experiment.')
+
+# Extra
+parser.add_argument('--threads', type=int, help='The number of threads to be used.', default=mp.cpu_count())
 
 # Output Parameters
 parser.add_argument('-o', '--output-dir', type=str, help='The output directory.', default='./')
@@ -72,7 +76,7 @@ class DataSetHandler:
 class Experiment:
     valid_experiments = ['false_positive', 'false_negative']
 
-    def __init__(self, D, W, k, presence_threshold, experiments_to_run, dataset_handler):
+    def __init__(self, D, W, k, presence_threshold, experiments_to_run, dataset_handler, path_to_exe, path_to_navigation_exe):
         self.D = D
         self.W = W
         self.k = k
@@ -81,14 +85,19 @@ class Experiment:
         self.dataset_handler = dataset_handler
         self.results = {}
 
-    def run(self, path_to_exe):
-        run_command = f'{path_to_exe} {self.k} {self.dataset_handler.read_length} {self.W} {self.D} {self.presence_threshold} < {self.dataset_handler.reads_file}'
+        self.path_to_exe = path_to_exe
+        self.path_to_navigation_exe = path_to_navigation_exe
+
+    def run(self):
+        run_command = f'{self.path_to_exe} {self.k} {self.dataset_handler.read_length} {self.W} {self.D} {self.presence_threshold} < {self.dataset_handler.reads_file}'
         print(f'Executing: {run_command}')
         os.system(run_command)
         self.results['sketch'] = DeBruijnCountMin.from_file('sketch.bin')
 
-    def run_navigation(self, path_to_navigation_exe):
-        run_command = f'{path_to_navigation_exe} {self.k} sketch.bin starting-kmers.txt K{self.k}W{self.W}D{self.D}T{self.presence_threshold}'
+        self.run_navigation()
+
+    def run_navigation(self):
+        run_command = f'{self.path_to_navigation_exe} {self.k} sketch.bin starting-kmers.txt K{self.k}W{self.W}D{self.D}T{self.presence_threshold} {self.presence_threshold}'
         print(f'Executing: {run_command}')
         os.system(run_command)
 
@@ -142,13 +151,12 @@ class ExperimentSet:
 
         variations = product(args.D, args.W, args.k, args.presence_threshold)
         for variation in variations:
-            experiment = Experiment(*variation, experiments_to_run, dataset_handler)
+            experiment = Experiment(*variation, experiments_to_run, dataset_handler, self.args.executable, self.args.navigation_executable)
             self.experiments.append(experiment)
     
     def run(self):
-        for experiment in self.experiments:
-            experiment.run(self.args.executable)
-            experiment.run_navigation(self.args.navigation_executable)
+        with mp.Pool(self.args.threads) as pool:
+            pool.map(Experiment.run, self.experiments)
 
     def save_results(self):
         for experiment in self.experiments:
@@ -158,10 +166,17 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     # Make sure all the paths are absolute
-    args.synthetic_dataset_generator = os.path.abspath(args.synthetic_dataset_generator)
+    if args.reads_file:
+        args.reads_file = os.path.abspath(args.reads_file)
+    if args.synthetic_dataset_generator:
+        args.synthetic_dataset_generator = os.path.abspath(args.synthetic_dataset_generator)
     args.executable = os.path.abspath(args.executable)
     args.navigation_executable = os.path.abspath(args.navigation_executable)
     args.output_dir = os.path.abspath(args.output_dir)
+
+    #
+    if args.threads != 1:
+        raise NotImplementedError("Multithreaded execution is not implemented yet")
 
     # Change working directory to output directory
     os.chdir(args.output_dir)
