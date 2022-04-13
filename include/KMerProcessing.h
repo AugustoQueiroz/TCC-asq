@@ -1,6 +1,7 @@
 #ifndef KMER_MAPPING_H
 #define KMER_MAPPING_H
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 

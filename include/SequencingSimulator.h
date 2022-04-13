@@ -1,6 +1,7 @@
 #ifndef SEQUENCING_SIMULATOR_H
 #define SEQUENCING_SIMULATOR_H
 
+#include <stdint.h>
 #include <stdlib.h>
 
 char* generateRandomSequence(size_t length);

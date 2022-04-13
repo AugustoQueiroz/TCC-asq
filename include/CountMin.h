@@ -1,6 +1,7 @@
 #ifndef COUNTMIN_H
 #define COUNTMIN_H
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 
