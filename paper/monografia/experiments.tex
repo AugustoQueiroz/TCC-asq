@@ -1,0 +1,21 @@
+\section{Experiments}
+
+\subsection{\emph{E.~Coli}}
+
+We used the reference genome for the \emph{E.~Coli} bacterium available in \url{http://ftp.ensemblgenomes.org/pub/bacteria/release-52/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655_gca_000005845/dna/}
+
+\subsubsection{Synthetic reads without errors}
+
+As a first experiment, we generated synthetic reads without errors by reading substrings of length \textit{250} from the reference genome starting at
+a random position. This was repeated a number of times in order to give the desired coverage of \textit{80x} (i.e.: $\frac{|\mathit{genome}| \times 80}{250}$).
+
+\subsubsection{Synthetic reads with errors}
+
+In order to simulate the reads as they would be produced by the sequencing process, we used the ART Illumina toolkit to generate
+synthetic reads from the \emph{E.~Coli} genome. The reads were generated using the following parameters:
+
+\begin{enumerate}
+\item \textbf{Sequencing System}: Illumina MiSeq v3
+\item \textbf{Read length}: \textit{250bp}
+\item \textbf{Coverage}: \textit{80x}
+\end{enumerate}
