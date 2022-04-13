@@ -1,6 +1,6 @@
 IDIR = ../include
 CC=gcc
-CFLAGS=-I$(IDIR) -Wall
+CFLAGS=-I$(IDIR) -Wall -fopenmp
 
 BUILDDIR=build
 
@@ -15,7 +15,7 @@ MAINOBJ = $(patsubst %,$(BUILDDIR)/%,$(_MAINOBJ))
 _SIMULATOROBJ = ReadsGenerator.o SequencingSimulator.o
 SIMULATOROBJ = $(patsubst %,$(BUILDDIR)/%,$(_SIMULATOROBJ))
 
-_TRAVERSALOBJ = CountMin.o Hashing.o KmerProcessing.o mathutils.o
+_TRAVERSALOBJ = CountMin.o Hashing.o KMerProcessing.o mathutils.o
 TRAVERSALOBJ = $(patsubst %,$(BUILDDIR)/%,$(_TRAVERSALOBJ))
 
 $(BUILDDIR)/%.o: %.c $(DEPS)
