@@ -5,6 +5,7 @@ import argparse
 import multiprocessing as mp
 
 from DeBruijnCountMin import DeBruijnCountMin
+from fastq_reader import FastQParser
 
 parser = argparse.ArgumentParser(description='Runs a parameter variation experiment.')
 
@@ -46,7 +47,12 @@ class DataSetHandler:
                 self.read_length = len(reads_file.readline().strip())
         elif args.fasta_file:
             self.fasta_file = args.fasta_file
-            raise NotImplementedError('Fasta file support not implemented yet')
+            parser = FastQParser()
+            with open('reads.txt', 'w') as reads_file:
+                for read in parser.naive_parse(self.fasta_file):
+                    reads_file.write(read['sequence'] + '\n')
+                    self.read_length = len(read['sequence'])
+            self.reads_file = 'reads.txt'
         else:
             self.sequence_length = args.synthetic_params[0]
             self.read_length = args.synthetic_params[1]
@@ -56,8 +62,9 @@ class DataSetHandler:
             self.reads_file = 'reads.txt'
 
     def get_reads(self):
-        with open(self.reads_file) as reads_file:
-            return list(map(lambda line: line.strip(), reads_file.readlines()))
+        if self.reads_file:
+            with open(self.reads_file) as reads_file:
+                return list(map(lambda line: line.strip(), reads_file.readlines()))
 
     def get_k_mer_counts(self, k):
         reads = self.get_reads()
@@ -168,6 +175,8 @@ if __name__ == '__main__':
     # Make sure all the paths are absolute
     if args.reads_file:
         args.reads_file = os.path.abspath(args.reads_file)
+    if args.fasta_file:
+        args.fasta_file = os.path.abspath(args.fasta_file)
     if args.synthetic_dataset_generator:
         args.synthetic_dataset_generator = os.path.abspath(args.synthetic_dataset_generator)
     args.executable = os.path.abspath(args.executable)
