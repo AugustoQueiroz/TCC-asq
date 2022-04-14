@@ -1,5 +1,9 @@
 \documentclass[bsc]{ufpethesis}
 
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+
 \university{Universidade Federal de Pernambuco}
 \institute{Centro de Informatica}
 \program{Bacharelado em Engenharia da Computação}
@@ -16,4 +20,15 @@
     \frontpage
     \presentationpage
 
+    \mainmatter
+    \chapter{Introduction}
+    \chapter{State of the Art}
+    \chapter{Fundamentação Teórica e Desenvolvimento}
+    \include{methodology}
+    \include{experiments}
+    \chapter{Results}
+    \chapter{Conclusion}
+
+    \backmatter
+    \bibliography{references}
 \end{document}
