@@ -67,3 +67,28 @@ char* kMerFromCode(size_t kmerCode, size_t kmerLength) {
 
     return kmer;
 }
+
+/**
+ * @brief Generates the reverse complement of the given k-mer. I.e. the k-mer is reversed and each base is substituted by it's complement (A = T, C = G).
+ * 
+ * @param kmer
+ * @return char* The reverse complement of the given k-mer. Dynamically allocated, **must be freed**.
+ */
+char* reverseComplement(char* kmer) {
+    size_t kmerLength = strlen(kmer);
+    char* reverseComplementKMer = (char*) malloc((kmerLength + 1) * sizeof(char));
+
+    char complements[26];
+    complements['A' - 'A'] = 'T';
+    complements['C' - 'A'] = 'G';
+    complements['G' - 'A'] = 'C';
+    complements['T' - 'A'] = 'A';
+
+    for (size_t i = kmerLength; i > 0; i--) {
+        reverseComplementKMer[kmerLength - i] = complements[kmer[i-1] - 'A'];
+    }
+
+    reverseComplementKMer[kmerLength] = '\0';
+
+    return reverseComplementKMer;
+}
