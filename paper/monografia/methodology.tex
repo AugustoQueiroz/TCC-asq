@@ -27,7 +27,7 @@ is above a certain threshold. This threshold should be defined as a function of 
 
 \paragraph{Adding out edges.} An out-edge is recorded to a k-mer by taking the last base of it's following k-mer. This update is only done,
 however, once the latter is found to be present in the graph. In this way, we avoid storing spurious out edges for erroneous k-mers.
-This presence requirement is only applied to the head k-mer.
+iiThis presence requirement is only applied to the head k-mer.
 
 \begin{algorithm}
     \caption{$\mathit{addOutEdge}(\text{k-mer}, \mathit{outEdge})$}\label{alg:addOutEdge}
