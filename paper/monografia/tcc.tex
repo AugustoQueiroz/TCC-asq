@@ -1,17 +1,24 @@
 \documentclass[bsc,en]{ufpethesis}
 
-\usepackage{algorithm}
+\usepackage[ruled]{algorithm2e}
 \usepackage{algpseudocode}
 \usepackage{amsmath}
+\usepackage{xspace}
+\usepackage{xcolor}
 
-\newcommand{\dB}{de~Bruijn}
-\newcommand{\dBG}{de~Bruijn graph}
+\newcommand{\dB}{de~Bruijn\xspace}
+\newcommand{\dBG}{de~Bruijn graph\xspace}
+\newcommand{\dBCM}{de~Bruijn CountMin\xspace}
+\newcommand{\dBHT}{de~Bruijn Hashtable\xspace}
+\newcommand{\cm}{CountMin\xspace}
 \newcommand{\kmer}{\mbox{$k$-mer}}
 \newcommand{\chr}[1]{\ensuremath{\mathtt{#1}}}
 \newcommand{\A}{\chr{A}}
 \newcommand{\C}{\chr{C}}
 \newcommand{\G}{\chr{G}}
 \newcommand{\T}{\chr{T}}
+
+\newcommand{\asq}[1]{\color{red}$\rightarrow$ asq says: #1 $\leftarrow$ \color{black}}
 
 
 \university{Universidade Federal de Pernambuco}
@@ -23,7 +30,7 @@
 
 \adviser{Paulo Gustavo Soares da Fonseca}
 
-\title{Space-efficient representations for \emph{de~Bruijn} graphs for data streams}
+\title{Space-efficient representations for \dBG for data streams}
 
 \begin{document}
 \frontmatter
@@ -33,12 +40,11 @@
     \mainmatter
     \chapter{Introduction}
     \chapter{State of the Art}
-    \chapter{Fundamentação Teórica e Desenvolvimento}
-    \include{methodology}
-    \include{experiments}
+    \include{chapter3}
     \chapter{Results}
     \chapter{Conclusion}
 
     \backmatter
+    \bibliographystyle{abbrv}
     \bibliography{references}
 \end{document}
