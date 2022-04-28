@@ -9,6 +9,7 @@
 \doublespacing
 \usepackage{lineno}
 \usepackage{outlines}
+\usepackage[normalem]{ulem}
 
 \newcommand{\dB}{de~Bruijn\xspace}
 \newcommand{\dBG}{de~Bruijn graph\xspace}
@@ -22,14 +23,24 @@
 \newcommand{\C}{\chr{C}}
 \newcommand{\G}{\chr{G}}
 \newcommand{\T}{\chr{T}}
+\newcommand{\keyterm}[1]{\textit{\textbf{#1}\/\xspace}}
+\newcommand{\str}[2]{\ensuremath{#1_0\cdots#1_{#2-1}}}
+\newcommand{\strname}[1]{\ensuremath{\uppercase{#1}}}
+\newcommand{\strdef}[2]{\ensuremath{\strname{#1}=\str{#1}{#2}}}
+\newcommand{\strslice}[3]{\ensuremath{\strname{#1}[#2:#3]}}
+\newcommand{\strsetname}[1]{\ensuremath{\mathcal{\uppercase{#1}}}}
 
 \newcommand{\tochange}[1]{\color{red} #1 \color{black}}
 \newcommand{\toconsider}[1]{\color{blue} #1 \color{black}}
 \newcommand{\asq}[1]{\color{red}$\rightarrow$ asq says: #1 $\leftarrow$ \color{black}}
+\newcommand{\paguso}[1]{\color{magenta}$\rightarrow$ paguso says: #1 $\leftarrow$ \color{black}}
+\newcommand{\remove}[2][]{\color{magenta}{\sout{#2}(\textit{#1})}\color{black}}
+\newcommand{\change}[3][]{\remove[#1]{#2}{#3}}
 
+\newcommand{\readset}{\strsetname{R}\xspace}
 
 \university{Universidade Federal de Pernambuco}
-\institute{Centro de Informatica}
+\institute{Centro de Informática}
 \program{Bacharelado em Engenharia da Computação}
 \majorfield{Engenharia da Computação}
 
@@ -37,7 +48,7 @@
 
 \adviser{Paulo Gustavo Soares da Fonseca}
 
-\title{Space-efficient representations for \dBG for data streams}
+\title{Space-efficient representation of de~Bruijn graphs for data streams}
 
 \begin{document}
     \linenumbers
