@@ -74,7 +74,7 @@ char* kMerFromCode(size_t kmerCode, size_t kmerLength) {
  * @param kmer
  * @return char* The reverse complement of the given k-mer. Dynamically allocated, **must be freed**.
  */
-char* reverseComplement(char* kmer) {
+char* reverseComplement(const char* kmer) {
     size_t kmerLength = strlen(kmer);
     char* reverseComplementKMer = (char*) malloc((kmerLength + 1) * sizeof(char));
 
