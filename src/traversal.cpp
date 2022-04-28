@@ -66,27 +66,35 @@ int main(int argc, char** argv) {
             uint8_t outEdges = queryResult >> 12;
             if (outEdges & 0b1000) {
                 std::string nextKMer = extendKMer(currentKMer, 'A');
-                if (visited.find(nextKMer) == visited.end()) {
+				std::string reverseComplementKMer = reverseComplement(nextKMer.c_str());
+                if (visited.find(nextKMer) == visited.end())
                     toVisit.push(nextKMer);
-                }
+				if (visited.find(reverseComplementKMer) == visited.end())
+					toVisit.push(reverseComplementKMer);
             }
             if (outEdges & 0b0100) {
                 std::string nextKMer = extendKMer(currentKMer, 'C');
-                if (visited.find(nextKMer) == visited.end()) {
+				std::string reverseComplementKMer = reverseComplement(nextKMer.c_str());
+                if (visited.find(nextKMer) == visited.end())
                     toVisit.push(nextKMer);
-                }
+				if (visited.find(reverseComplementKMer) == visited.end())
+					toVisit.push(reverseComplementKMer);
             }
             if (outEdges & 0b0010) {
                 std::string nextKMer = extendKMer(currentKMer, 'G');
-                if (visited.find(nextKMer) == visited.end()) {
+				std::string reverseComplementKMer = reverseComplement(nextKMer.c_str());
+                if (visited.find(nextKMer) == visited.end())
                     toVisit.push(nextKMer);
-                }
+				if (visited.find(reverseComplementKMer) == visited.end())
+					toVisit.push(reverseComplementKMer);
             }
             if (outEdges & 0b0001) {
                 std::string nextKMer = extendKMer(currentKMer, 'T');
-                if (visited.find(nextKMer) == visited.end()) {
+				std::string reverseComplementKMer = reverseComplement(nextKMer.c_str());
+                if (visited.find(nextKMer) == visited.end())
                     toVisit.push(nextKMer);
-                }
+				if (visited.find(reverseComplementKMer) == visited.end())
+					toVisit.push(reverseComplementKMer);
             }
         }
     }
