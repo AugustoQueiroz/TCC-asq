@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "SequencingSimulator.h"
+#include "KMerProcessing.h"
 
 #define KMER_LENGTH 32
 #define COUNTER_MASK 0xFFFFFFFFFFFFFFF
@@ -31,12 +33,18 @@ char* generateRandomSequence(size_t length) {
  * @param readLength The length of the read.
  * @return char* A substring of @p sequence of length @p readLength, starting at a random position. (Dynamically allocated, must be freed)
  */
-char* getRandomRead(char* sequence, size_t sequenceLength, size_t readLength) {
+char* getRandomRead(char* sequence, size_t sequenceLength, size_t readLength, bool returnReverseComplement) {
     char* read = malloc(readLength + 1);
     size_t start = rand() % (sequenceLength - readLength);
     for (size_t i = 0; i < readLength; i++) {
         read[i] = sequence[start + i];
     }
     read[readLength] = '\0';
+
+    if (returnReverseComplement) {
+        char* reverseComplementRead = reverseComplement(read);
+        strcpy(read, reverseComplementRead);
+        free(reverseComplementRead);
+    }
     return read;
 }

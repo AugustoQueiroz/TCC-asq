@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "SequencingSimulator.h"
 
@@ -24,7 +25,7 @@ int main(int argc, char** argv) {
     size_t numberOfReads = sequenceLength * coverage / readLength;
     FILE* readsFile = fopen("reads.txt", "w");
     for (size_t i = 0; i < numberOfReads; i++) {
-        char* read = getRandomRead(sequence, sequenceLength, readLength);
+        char* read = getRandomRead(sequence, sequenceLength, readLength, rand() & 1);
         fprintf(readsFile, "%s\n", read);
         free(read);
     }
