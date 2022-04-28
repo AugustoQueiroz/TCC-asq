@@ -12,7 +12,7 @@ DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 _MAINOBJ = main.o CountMin.o Hashing.o KMerProcessing.o mathutils.o
 MAINOBJ = $(patsubst %,$(BUILDDIR)/%,$(_MAINOBJ))
 
-_SIMULATOROBJ = ReadsGenerator.o SequencingSimulator.o
+_SIMULATOROBJ = ReadsGenerator.o SequencingSimulator.o KMerProcessing.o
 SIMULATOROBJ = $(patsubst %,$(BUILDDIR)/%,$(_SIMULATOROBJ))
 
 _TRAVERSALOBJ = CountMin.o Hashing.o KMerProcessing.o mathutils.o
