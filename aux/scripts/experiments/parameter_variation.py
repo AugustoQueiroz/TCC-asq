@@ -50,7 +50,7 @@ class DataSetHandler:
             parser = FastQParser()
             with open('reads.txt', 'w') as reads_file:
                 for read in parser.naive_parse(self.fasta_file):
-                    reads_file.write(read['sequence'] + '\n')
+                    reads_file.write(read['sequence'].strip() + '\n')
                     self.read_length = len(read['sequence'])
             self.reads_file = 'reads.txt'
         else:
