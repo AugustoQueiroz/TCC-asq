@@ -27,7 +27,7 @@ char* getKMerStartingAt(char* read, size_t start, size_t kmerLength) {
  * @param kmer The k-mer string.
  * @return size_t The number it encodes.
  */
-size_t mapKMer(char* kmer) {
+size_t mapKMer(const char* kmer) {
     size_t kmerCode = 0;
     for (size_t i = 0; kmer[i] != '\0'; i++) {
         kmerCode <<= 2;
