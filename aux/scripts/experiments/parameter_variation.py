@@ -99,12 +99,17 @@ class Experiment:
         run_command = f'{self.path_to_exe} {self.k} {self.dataset_handler.read_length} {self.W} {self.D} {self.presence_threshold} < {self.dataset_handler.reads_file}'
         print(f'Executing: {run_command}')
         os.system(run_command)
-        self.results['sketch'] = DeBruijnCountMin.from_file('sketch.bin')
+        mv_command = f'mv sketch.bin K{self.k}W{self.W}D{self.D}T{self.presence_threshold}.sketch'
+        print(f'Executing: {mv_command}')
+        os.system(mv_command)
+        mv_command = f'mv starting-kmers.txt K{self.k}W{self.W}D{self.D}T{self.presence_threshold}.starting'
+        print(f'Executing: {mv_command}')
+        os.system(mv_command)
 
         self.run_navigation()
 
     def run_navigation(self):
-        run_command = f'{self.path_to_navigation_exe} {self.k} sketch.bin starting-kmers.txt K{self.k}W{self.W}D{self.D}T{self.presence_threshold} {self.presence_threshold}'
+        run_command = f'{self.path_to_navigation_exe} {self.k} K{self.k}W{self.W}D{self.D}T{self.presence_threshold}.sketch K{self.k}W{self.W}D{self.D}T{self.presence_threshold}.starting K{self.k}W{self.W}D{self.D}T{self.presence_threshold}.results {self.presence_threshold}'
         print(f'Executing: {run_command}')
         os.system(run_command)
 
