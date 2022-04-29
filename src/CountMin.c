@@ -142,7 +142,8 @@ void saveDeBruijnCountMin(struct DeBruijnCountMin* dBCM, FILE* outputFile) {
     }
 }
 
-struct DeBruijnCountMin* loadDeBruijnCountMin(FILE* inputFile) {
+struct DeBruijnCountMin* loadDeBruijnCountMin(const char* inputFilePath) {
+    FILE* inputFile = fopen(inputFilePath, "r");
     struct DeBruijnCountMin* dBCM = (struct DeBruijnCountMin*) malloc(sizeof(struct DeBruijnCountMin));
     fread(&dBCM->W, sizeof(size_t), 1, inputFile);
     fread(&dBCM->D, sizeof(size_t), 1, inputFile);
@@ -158,5 +159,6 @@ struct DeBruijnCountMin* loadDeBruijnCountMin(FILE* inputFile) {
         dBCM->table[i] = (uint16_t*) malloc(dBCM->W * sizeof(uint16_t));
         fread(dBCM->table[i], sizeof(uint16_t), dBCM->W, inputFile);
     }
+    fclose(inputFile);
     return dBCM;
 }

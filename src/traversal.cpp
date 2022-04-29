@@ -31,9 +31,7 @@ int main(int argc, char** argv) {
 
     // Load the sketch from the file
     std::cout << "Loading sketch from " << sketch_fp << std::endl;
-    FILE* sketch_file = fopen(sketch_fp.c_str(), "r");
-    struct DeBruijnCountMin* sketch = loadDeBruijnCountMin(sketch_file);
-    fclose(sketch_file);
+    struct DeBruijnCountMin* sketch = loadDeBruijnCountMin(sketch_fp.c_str());
 
     // Setup for graph traversal
     std::cout << "Setting up for traversal" << std::endl;
