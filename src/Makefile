@@ -30,6 +30,9 @@ simulator: $(SIMULATOROBJ)
 traversal: traversal.cpp $(TRAVERSALOBJ)
 	g++ -o $(BUILDDIR)/$@ $^ $(CFLAGS) $(LIBS)
 
+counting: counting.cpp $(TRAVERSALOBJ)
+	g++ -o $(BUILDDIR)/$@ $^ $(CFLAGS) $(LIBS)
+
 .PHONY: clean
 
 clean:
