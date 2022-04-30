@@ -12,10 +12,24 @@ extern "C" {
 #include "KMerProcessing.h"
 }
 
-std::string extendKMer(std::string currentKMer, char nextBase) {
-  std::string nextKMer = currentKMer.substr(1);
-  nextKMer.push_back(nextBase);
-  return nextKMer;
+size_t extendKMer(size_t currentKMer, char nextBase, int K) {
+    size_t kmerMask = ((size_t) 1 << (2*K)) - 1;
+    size_t nextKMer = (currentKMer << 2);
+    switch (nextBase) {
+        case 'A':
+        nextKMer |= 0b00;
+        break;
+        case 'C':
+        nextKMer |= 0b01;
+        break;
+        case 'G':
+        nextKMer |= 0b10;
+        break;
+        case 'T':
+        nextKMer |= 0b11;
+        break;
+    }
+    return nextKMer & kmerMask;
 }
 
 int main(int argc, char** argv) {
@@ -31,66 +45,68 @@ int main(int argc, char** argv) {
 
     // Load the sketch from the file
     std::cout << "Loading sketch from " << sketch_fp << std::endl;
-    FILE* sketch_file = fopen(sketch_fp.c_str(), "r");
-    struct DeBruijnCountMin* sketch = loadDeBruijnCountMin(sketch_file);
-    fclose(sketch_file);
+    struct DeBruijnCountMin* sketch = loadDeBruijnCountMin(sketch_fp.c_str());
 
     // Setup for graph traversal
     std::cout << "Setting up for traversal" << std::endl;
-    std::queue<std::string> toVisit;
-    std::set<std::string> visited;
+    std::queue<size_t> toVisit;
+    std::set<size_t> visited;
 
     // Load the starting kmers
     std::cout << "Loading starting kmers" << std::endl;
     std::string startingKMer;
     while (startingKMersFile >> startingKMer) {
-        toVisit.push(startingKMer);
+        toVisit.push(mapKMer(startingKMer.c_str()));
     }
     startingKMersFile.close();
 
     // Traversing the graph
     std::cout << "Traversing graph" << std::endl;
-    char* currentKMer = (char*) malloc((K+1) * sizeof(char));
-    currentKMer[K] = '\0';
+    size_t currentKMer = 0;
     while (!toVisit.empty()) {
-        visited.insert(toVisit.front());
-        strcpy(currentKMer, toVisit.front().c_str());
-        currentKMer[K] = '\0';
+        currentKMer = toVisit.front();
         toVisit.pop();
-        size_t currentKMerCode = mapKMer(currentKMer);
+        visited.insert(currentKMer);
 
-        uint16_t queryResult = queryDeBruijnCountMin(sketch, currentKMerCode);
-        outputFile << currentKMer << ": " << (queryResult & COUNTER_MASK) << " " << std::bitset<4>(queryResult >> 12) << std::endl;
+        uint16_t queryResult = queryDeBruijnCountMin(sketch, currentKMer);
+        outputFile << kMerFromCode(currentKMer, K) << ": " << (queryResult & COUNTER_MASK) << " " << std::bitset<4>(queryResult >> 12) << std::endl;
 
         if (queryResult >= presence_threshold) {
             uint8_t outEdges = queryResult >> 12;
             if (outEdges & 0b1000) {
-                std::string nextKMer = extendKMer(currentKMer, 'A');
-                if (visited.find(nextKMer) == visited.end()) {
+                size_t nextKMer = extendKMer(currentKMer, 'A', K);
+				size_t reverseComplementKMer = mapKMer(reverseComplement(kMerFromCode(nextKMer, K)));
+                if (visited.find(nextKMer) == visited.end())
                     toVisit.push(nextKMer);
-                }
+				if (visited.find(reverseComplementKMer) == visited.end())
+					toVisit.push(reverseComplementKMer);
             }
             if (outEdges & 0b0100) {
-                std::string nextKMer = extendKMer(currentKMer, 'C');
-                if (visited.find(nextKMer) == visited.end()) {
+                size_t nextKMer = extendKMer(currentKMer, 'C', K);
+				size_t reverseComplementKMer = mapKMer(reverseComplement(kMerFromCode(nextKMer, K)));
+                if (visited.find(nextKMer) == visited.end())
                     toVisit.push(nextKMer);
-                }
+				if (visited.find(reverseComplementKMer) == visited.end())
+					toVisit.push(reverseComplementKMer);
             }
             if (outEdges & 0b0010) {
-                std::string nextKMer = extendKMer(currentKMer, 'G');
-                if (visited.find(nextKMer) == visited.end()) {
+                size_t nextKMer = extendKMer(currentKMer, 'G', K);
+				size_t reverseComplementKMer = mapKMer(reverseComplement(kMerFromCode(nextKMer, K)));
+                if (visited.find(nextKMer) == visited.end())
                     toVisit.push(nextKMer);
-                }
+				if (visited.find(reverseComplementKMer) == visited.end())
+					toVisit.push(reverseComplementKMer);
             }
             if (outEdges & 0b0001) {
-                std::string nextKMer = extendKMer(currentKMer, 'T');
-                if (visited.find(nextKMer) == visited.end()) {
+                size_t nextKMer = extendKMer(currentKMer, 'T', K);
+				size_t reverseComplementKMer = mapKMer(reverseComplement(kMerFromCode(nextKMer, K)));
+                if (visited.find(nextKMer) == visited.end())
                     toVisit.push(nextKMer);
-                }
+				if (visited.find(reverseComplementKMer) == visited.end())
+					toVisit.push(reverseComplementKMer);
             }
         }
     }
-    free(currentKMer);
     outputFile.close();
 
     return 0;

@@ -1,6 +1,7 @@
 #ifndef FIB_HASHING_H
 #define FIB_HASHING_H
 
+#include <stdint.h>
 #include <stdlib.h>
 
 #define LARGE_PRIME 4294967311l

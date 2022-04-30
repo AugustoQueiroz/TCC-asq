@@ -1,6 +1,6 @@
 IDIR = ../include
 CC=gcc
-CFLAGS=-I$(IDIR) -Wall
+CFLAGS=-I$(IDIR) -Wall -fopenmp
 
 BUILDDIR=build
 
@@ -12,10 +12,10 @@ DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 _MAINOBJ = main.o CountMin.o Hashing.o KMerProcessing.o mathutils.o
 MAINOBJ = $(patsubst %,$(BUILDDIR)/%,$(_MAINOBJ))
 
-_SIMULATOROBJ = ReadsGenerator.o SequencingSimulator.o
+_SIMULATOROBJ = ReadsGenerator.o SequencingSimulator.o KMerProcessing.o
 SIMULATOROBJ = $(patsubst %,$(BUILDDIR)/%,$(_SIMULATOROBJ))
 
-_TRAVERSALOBJ = CountMin.o Hashing.o KmerProcessing.o mathutils.o
+_TRAVERSALOBJ = CountMin.o Hashing.o KMerProcessing.o mathutils.o
 TRAVERSALOBJ = $(patsubst %,$(BUILDDIR)/%,$(_TRAVERSALOBJ))
 
 $(BUILDDIR)/%.o: %.c $(DEPS)
@@ -28,6 +28,9 @@ simulator: $(SIMULATOROBJ)
 	$(CC) -o $(BUILDDIR)/$@ $^ $(CFLAGS) $(LIBS)
 
 traversal: traversal.cpp $(TRAVERSALOBJ)
+	g++ -o $(BUILDDIR)/$@ $^ $(CFLAGS) $(LIBS)
+
+counting: counting.cpp $(TRAVERSALOBJ)
 	g++ -o $(BUILDDIR)/$@ $^ $(CFLAGS) $(LIBS)
 
 .PHONY: clean

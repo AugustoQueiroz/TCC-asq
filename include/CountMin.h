@@ -1,6 +1,7 @@
 #ifndef COUNTMIN_H
 #define COUNTMIN_H
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -21,6 +22,6 @@ void updateDeBruijnCountMinOutEdges(struct DeBruijnCountMin* dBCM, size_t key, u
 uint16_t queryDeBruijnCountMin(struct DeBruijnCountMin* dBCM, size_t key);
 void dumpTable(struct DeBruijnCountMin* dBCM, FILE* dumpFile);
 void saveDeBruijnCountMin(struct DeBruijnCountMin* dBCM, FILE* outputFile);
-struct DeBruijnCountMin* loadDeBruijnCountMin(FILE* inputFile);
+struct DeBruijnCountMin* loadDeBruijnCountMin(const char* inputFilePath);
 
 #endif
