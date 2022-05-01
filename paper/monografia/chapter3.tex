@@ -1,5 +1,7 @@
 \chapter{Fundamentação teórica e metodologia}\paguso{Chapter title in English}
 
+\paguso{Nesta primeira revisão, eu editei algumas coisas diretamente mas deixei várias outras anotadas pra vc perceber o espírito da coisa. A ideia básica é keep it simple. Quando vc for revisar, releia as frases e veja que palavras são desnecessárias pra compreensão do texto. Se remover uma palavra ou expressão não muda o sentido do texto nem prejudica sua compreensão, não hesite: retire-as. Prefira também orações na voz ativa e na ordem direta sujeito-predicado-complemento.}
+
 \section{\dBG{s}}
 
 % - Detailed explanation of \dBG of a set of DNA sequences
@@ -45,7 +47,7 @@ os objetivos das duas estrutas aqui, visto que isso já seria feito na introduç
 \subsection{Reverse Complements}
 
 \paguso{Esta parte tá meio fora de lugar. Acho que o melhor seria mover a explicação sobre \dBG usando CR para as seção inicial, logo após a figura~\ref{fig:dbgexample}.}
-\change{One individuality of the genome sequencing context}{One difficulty of using \dBG to represent DNA data} is the presence of \keyterm{reverse complements}. When generating sequencing reads, \change[prefer active voice]{a sequence of DNA can be read both}{the machine reads either of the two complementary strands of a fragment of the input DNA}. That is, the output read may correspond to the sequence \strname{S} in the forward (5'-3') direction, or its reverse complement \strname{\overline{S}} in the backward (3'-5') direction, with
+\change{One individuality of the genome sequencing context}{One difficulty of using \dBG{s} to represent DNA data} is the presence of \keyterm{reverse complements}. When generating sequencing reads, \change[prefer active voice]{a sequence of DNA can be read both}{the machine reads either of the two complementary strands of a fragment of the input DNA}. That is, the output read may correspond to the sequence \strname{S} in the forward (5'-3') direction, or its reverse complement \strname{\overline{S}} in the backward (3'-5') direction, with
 \strname{\overline{S}} being obtained from \strname{S} by swapping each base with its Watson-Crick complement
 ($\A \leftrightarrow \T$, $\C \leftrightarrow \G$) and then reversing the string, and vice versa. 
 
@@ -61,18 +63,29 @@ makes the graph symmetric; a forward traversal corresponds to a backwards traver
 \section{\cm}
 \label{sec:countmin}
 
-The \cm sketch, first introduced in \cite{Cormode2005}, is a sub-linear data structure intended to allow for event frequency mapping.
+The \cm sketch \remove{, first introduced in} \cite{Cormode2005} is a \change[acho que quase ninguém usa mais esses hífens]{sub-linear}{sublinear} data structure \remove{intended to allow} for event frequency mapping.
+\change{
 In this way, it must allow for the query of the frequency of a given event, as well as the update of that frequency, through the
-\emph{query} and \emph{update} operations. The sketch is composed of a $W$-wide, $D$-deep matrix of counters. With each row in this
-matrix is associated a hash function that map the possible events to the $W$ positions in that row. All $D$ hash functions
-must be pair-wise independent.
+\emph{query} and \emph{update} operations.
+}{
+It offers two basic operations
+\begin{compactenum}
+\item $update(e, f)$, and
+\item $query(e)$,
+\end{compactenum}
+respectively for informing the occurrence of an event $e$ with frequency $f$, and for obtaining an estimate of the accumulated frequency of event $e$ up to that point.}
 
-Updating the frequency of a given event is done by passing it through the hash functions for each row, and then updating the counter in
-the resulting position accordingly. \toconsider{In this work we take interest in a simpler version of the \cm sketch where the counters
-are only incremented by one.}
+The sketch is composed of a \change{$W$-wide, $D$-deep matrix $C$ of counters.}{$D\times W$ matrix of counters $C$,} \change{With each row in this
+matrix is associated a hash function that map the possible events to the $W$ positions in that row.}{and a set of $D$ pairwise-independent hash functions $h_0\ldots h_{D-1}$, such that each $h_i$ maps an event to one of the $W$ cells in row $i$.} \remove{All $D$\/ hash functions
+must be pair-wise independent.}
 
-Querying the structure consists of, similarly, retrieving the value of the counter associated with the key in each row, and then returning
-the minimum value among them.
+
+Updating \change{the frequency of a given}{an} event is done by passing it through the hash functions for each row, and then \change{updating}{incrementing} the counters in
+the \change{resulting}{mapped} positions $h_i(e)$ accordingly. 
+\change{In this work we take interest in a}{We consider the} simpler case where we only report individual event occurrences, so that counters are always incremented by one.
+
+Querying the structure \change[consists of=to be made up of; consists in=is essentially]{consists of, similarly,}{consists in} retrieving the value of the counters associated with the key event in each row,  and then returning
+the minimum value among them, that is $\min\{C[i][h_i(e)]]; i=0\ldots D-1$\}.
 
 \asq{É interessante colocar os algoritmos do \cm mais formalmente ou só uma descrição "abstrata" é suficiente?}
 
