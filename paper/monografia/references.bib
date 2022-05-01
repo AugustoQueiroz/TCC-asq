@@ -86,3 +86,84 @@
    volume = {9},
    year = {2014},
 }
+
+@article{Pevzner2001,
+doi = {10.1073/pnas.171285098},
+author = {Pavel A. Pevzner  and Haixu Tang  and Michael S. Waterman },
+title = {An Eulerian path approach to DNA fragment assembly},
+journal = {Proceedings of the National Academy of Sciences},
+volume = {98},
+number = {17},
+pages = {9748-9753},
+year = {2001},
+doi = {10.1073/pnas.171285098},
+URL = {https://www.pnas.org/doi/abs/10.1073/pnas.171285098},
+eprint = {https://www.pnas.org/doi/pdf/10.1073/pnas.171285098},
+abstract = {For the last 20 years, fragment assembly in DNA sequencing
+ followed the “overlap–layout–consensus” paradigm that is used
+ in all currently available assembly tools. Although this approach
+ proved useful in assembling clones, it faces difficulties in genomic
+ shotgun assembly. We abandon the classical
+ “overlap–layout–consensus” approach in favor of a new
+ euler algorithm that, for the first time, resolves the
+ 20-year-old “repeat problem” in fragment assembly. Our main
+ result is the reduction of the fragment assembly to a variation of the
+ classical Eulerian path problem that allows one to generate accurate
+ solutions of large-scale sequencing problems. euler, in
+ contrast to the celera assembler, does not mask such
+ repeats but uses them instead as a powerful fragment assembly tool.}
+}
+
+@article{Pell2012,
+   abstract = {Deep sequencing has enabled the investigation of a wide range of environmental microbial ecosystems, but the high memory requirements for de novo assembly of short-read shotgun sequencing data from these complex populations are an increasingly large practical barrier. Here we introduce a memory-efficient graph representation with which we can analyze the k-mer connectivity of metagenomic samples. The graph representation is based on a probabilistic data structure, a Bloom filter, that allows us to efficiently store assembly graphs in as little as 4 bits per k-mer, albeit inexactly. We show that this data structure accurately represents DNA assembly graphs in low memory. We apply this data structure to the problem of partitioning assembly graphs into components as a prelude to assembly, and show that this reduces the overall memory requirements for de novo assembly of metagenomes. On one soil metagenome assembly, this approach achieves a nearly 40-fold decrease in the maximum memory requirements for assembly. This probabilistic graph representation is a significant theoretical advance in storing assembly graphs and also yields immediate leverage on metagenomic assembly.},
+   author = {Jason Pell and Arend Hintze and Rosangela Canino-Koning and Adina Howe and James M Tiedje and C Titus Brown},
+   doi = {10.1073/pnas.1121464109},
+   issue = {33},
+   journal = {Proceedings of the National Academy of Sciences},
+   pages = {13272-13277},
+   title = {Scaling metagenome sequence assembly with probabilistic de Bruijn graphs},
+   volume = {109},
+   url = {https://www.pnas.org/doi/abs/10.1073/pnas.1121464109},
+   year = {2012},
+}
+
+@report{Chikhi2013,
+   abstract = {Background: The de Bruijn graph data structure is widely used in next-generation sequencing (NGS). Many programs, e.g. de novo assemblers, rely on in-memory representation of this graph. However, current techniques for representing the de Bruijn graph of a human genome require a large amount of memory (≥ 30 GB). Results: We propose a new encoding of the de Bruijn graph, which occupies an order of magnitude less space than current representations. The encoding is based on a Bloom filter, with an additional structure to remove critical false positives. Conclusions: An assembly software implementing this structure, Minia, performed a complete de novo assembly of human genome short reads using 5.7 GB of memory in 23 hours.},
+   author = {Rayan Chikhi and Guillaume Rizk},
+   journal = {Algorithms for Molecular Biology},
+   keywords = {Bloom filter,de Bruijn graph,de novo assembly},
+   pages = {22},
+   title = {Space-efficient and exact de Bruijn graph representation based on a Bloom filter},
+   volume = {8},
+   url = {http://www.almob.org/content/8/1/22},
+   year = {2013},
+}
+
+@inproceedings{Bowe2012,
+  title={Succinct de Bruijn graphs},
+  author={Bowe, Alexander and Onodera, Taku and Sadakane, Kunihiko and Shibuya, Tetsuo},
+  booktitle={International workshop on algorithms in bioinformatics},
+  pages={225--235},
+  year={2012},
+  organization={Springer}
+}
+
+@article{Chikhi2019,
+  author = {Chikhi, Rayan and Holub, Jan and Medvedev, Paul},
+  title = {Data Structures to Represent a Set of k-Long DNA Sequences},
+  year = {2021},
+  issue_date = {January 2022},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {54},
+  number = {1},
+  issn = {0360-0300},
+  url = {https://doi.org/10.1145/3445967},
+  doi = {10.1145/3445967},
+  abstract = {The analysis of biological sequencing data has been one of the biggest applications of string algorithms. The approaches used in many such applications are based on the analysis of k-mers, which are short fixed-length strings present in a dataset. While these approaches are rather diverse, storing and querying a k-mer set has emerged as a shared underlying component. A set of k-mers has unique features and applications that, over the past 10 years, have resulted in many specialized approaches for its representation. In this survey, we give a unified presentation and comparison of the data structures that have been proposed to store and query a k-mer set. We hope this survey will serve as a resource for researchers in the field as well as make the area more accessible to researchers outside the field.},
+  journal = {ACM Comput. Surv.},
+  month = {mar},
+  articleno = {17},
+  numpages = {22},
+  keywords = {Bloom filters, unitgs, data structures, k-mers, FM-index, navigational data structures, de Bruijn graphs, biological sequencing data, k-mer sets}
+}
