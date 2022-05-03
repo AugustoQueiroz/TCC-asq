@@ -33,14 +33,14 @@ This definition generalizes naturally to a \emph{set of strings} \strsetname{X} 
 \asq{Não é mais interessante manter a discussão sobre lower boundaries no capítulo de estado da arte?}
 
 \remove[verbiage]{Due to its nature, a}{A} \dBG can be represented either by its set of nodes (\kmers) or edges ($(k+1)$-mers) equivalently, as one can be derived from the other.
-As such, a structure that can answer queries about the presence of a given node on the graph is enough to
+As such, a data structure that can answer queries about the presence of a given node on the graph is enough to
 represent the graph. \remove[unnecessary info?]{ Conversely, the same can be achieved with a structure that can answer the same kind of query but about edges. Such structures are called edge-centric, as opposed to the node-centric structures that we consider in this work. Both versions are trivially equivalent, however.} \remove{In this regard, }Conway\&Bromage showed that the lower bound on the space required to
 \emph{exactly} represent a \dBG \remove{exists, and} is $\Omega(n \log n)$ bits, \change[always prefer simpler forms]{for $n$ being the number of distinct \kmers present in the graph}{where $n$ is the number of nodes}\remove[isn't this obvious?]{,
 and $4^k > n$}\cite{Conway2011}.
 
 In order to further improve space-efficiency, new \remove{forms of} representations were created that trade deterministic exactness for a probabilistic approach. For instance, the so-called \keyterm{Navigational Data Structures} (NDS) have some probability of giving an erroneous answer to a membership query, 
 but can still be used to navigate the graph \cite{Chikhi2014}. This \change{definition is useful}{is} due to the fact that a \dBG is usually not queried for membership of \change{randomly selected}{random} nodes, but rather \remove{only} potential neighbors of \change{a known member node is queried}{nodes already known to be in the graph}. In the same paper where they introduce
-the idea of NDS \cite{Chikhi2014}\paguso{correct?}, Chikhi \emph{et al.} also present a lower bound for the number of bits needed to represent such a structure as $3.24n$.
+the idea of NDS \cite{Chikhi2014}\paguso{confirmar referência}, Chikhi \emph{et al.} also present a lower bound for the number of bits needed to represent such a structure as $3.24n$.
 In sections \ref{sec:debruijncountmin} and \ref{sec:debruijnhashtable} we will introduce two new NDS's. \asq{É necessário reiterar
 os objetivos das duas estrutas aqui, visto que isso já seria feito na introdução e é feito nas próprias sessões dedicadas a cada estrutura?}\paguso{até o momento, acho que não.}
 
@@ -50,7 +50,6 @@ os objetivos das duas estrutas aqui, visto que isso já seria feito na introduç
 \change{One individuality of the genome sequencing context}{One difficulty of using \dBG{s} to represent DNA data} is the presence of \keyterm{reverse complements}. When generating sequencing reads, \change[prefer active voice]{a sequence of DNA can be read both}{the machine reads either of the two complementary strands of a fragment of the input DNA}. That is, the output read may correspond to the sequence \strname{S} in the forward (5'-3') direction, or its reverse complement \strname{\overline{S}} in the backward (3'-5') direction, with
 \strname{\overline{S}} being obtained from \strname{S} by swapping each base with its Watson-Crick complement
 ($\A \leftrightarrow \T$, $\C \leftrightarrow \G$) and then reversing the string, and vice versa. 
-
 \paguso{Aqui vc já está apresentando sua representação ou discutindo representações em geral? Eu entendo que vc ainda está introduzindo os conceitos.}
 As in \cite{Conway2011}, this will be treated by processing
 all reads in both directions, without, however, merging nodes representing reverse complements. As noted by Conway \& Bromage: ``This
@@ -60,7 +59,7 @@ makes the graph symmetric; a forward traversal corresponds to a backwards traver
 
 \paguso{Acho que havíamos falado que iríamos introduzir top-down, adiantando o que ia ter na representação, e que operações seriam implementadas, antes de partir para a descrição de cada parte individualmente em detalhes}
 
-\section{\cm}
+\section{The \cm sketch}
 \label{sec:countmin}
 
 The \cm sketch \remove{, first introduced in} \cite{Cormode2005} is a \change[acho que quase ninguém usa mais esses hífens]{sub-linear}{sublinear} data structure \remove{intended to allow} for event frequency mapping.
@@ -77,15 +76,14 @@ respectively for informing the occurrence of an event $e$ with frequency $f$, an
 
 The sketch is composed of a \change{$W$-wide, $D$-deep matrix $C$ of counters.}{$D\times W$ matrix of counters $C$,} \change{With each row in this
 matrix is associated a hash function that map the possible events to the $W$ positions in that row.}{and a set of $D$ pairwise-independent hash functions $h_0\ldots h_{D-1}$, such that each $h_i$ maps an event to one of the $W$ cells in row $i$.} \remove{All $D$\/ hash functions
-must be pair-wise independent.}
-
+must be pair-wise independent.} 
 
 Updating \change{the frequency of a given}{an} event is done by passing it through the hash functions for each row, and then \change{updating}{incrementing} the counters in
 the \change{resulting}{mapped} positions $h_i(e)$ accordingly. 
 \change{In this work we take interest in a}{We consider the} simpler case where we only report individual event occurrences, so that counters are always incremented by one.
 
 Querying the structure \change[consists of=to be made up of; consists in=is essentially]{consists of, similarly,}{consists in} retrieving the value of the counters associated with the key event in each row,  and then returning
-the minimum value among them, that is $\min\{C[i][h_i(e)]]; i=0\ldots D-1$\}.
+the minimum value among them, that is $\min\{C[i, h_i(e)]; i=0\ldots D-1$\}.
 
 \asq{É interessante colocar os algoritmos do \cm mais formalmente ou só uma descrição "abstrata" é suficiente?}
 \paguso{Acho que assim chega.}
@@ -99,24 +97,40 @@ Figure \ref{fig:countminexample} presents a visualization of the \cm sketch.
     \includegraphics[width=0.8\textwidth]{figures/cm-example}
 	\end{center}
 	\caption{Example of a \cm sketch being used to count \kmers. $k=4$}\label{fig:countminexample}
+\paguso{A ideia da figura está boa, mas precisa aumentar a fonte pra não ficar ilegível. Se não couber, simplifica a parte do incremento. Muda o label de Increment para Update.}
 \end{figure}
 
-\subsection{As a representation for a \dBG}
+\paguso{Aqui é importante explicar que o \cm superestima as contagens devido a colisões, mas oferece algumas garantias.}
+It is important to notice that the \cm might overestimate the frequency of an event due to hash collisions, since more than one event might be mapped to the same cell of the matrix. However, the pairwise independence requirement ensures that, for any row $i$ and any two distinct events $e\neq e'$,
+\begin{equation*}
+\prob[h_i(e)=h_i(e')] = 1/W,
+\end{equation*}
+with this probability being computed over all possible choices of the hash function.
+Hence, by setting $W$ appropriately, we can control the expected number of collisions per row, and likewise, by choosing a sufficiently large $D$, we can control for the probability of having at least one row without collisions for a given event. In general, for two given parameters $\epsilon, \delta \in (0,1)$, by setting 
+$W=2/\epsilon$ and $D=\log1/\delta$, we have
+\begin{equation*}
+\prob[C.query(e) - f(e) > \epsilon F] < \delta,
+\end{equation*}
+where $f(e)$ represents the true frequency of $e$, and $F=\sum_{e_i}f(e_i)$ is the true total event count. Put another way, we can have the estimate error relative to the total event count to be `small' (no more than $\epsilon$) with `good' (at least $1-\delta$) probability.
+
+\subsection{\cm as an intermediate representation for \dBG{s}}
 
 \asq{Vale colocar isso aqui, ou é mais interessante deixar apenas para falar disso no capítulo anterior (State of the Art), quando falando
 sobre o \emph{FastEtch}?}
+\paguso{Deve migrar essa explicação pro início da Seção \dB \cm}
 
 A \cm sketch can implement the membership query operation by querying the count for a given \kmer and comparing it to a presence threshold:
 if the count surpasses this threshold, the \kmer is considered to be present in the \dBG, and if the count is inferior to the threshold the
-\kmer is considerent absent from the graph. This membership query is defined in Algorithm \ref{alg:countmin-memb}.
+\kmer is considered absent from the graph.\paguso{Qual é a rationale pra isso? Precisa explicar. Aqui deve ser introduzida a questão da cobertura.} This membership query is defined in Algorithm \ref{alg:countmin-memb}.
 
 \begin{algorithm}[htbp]
   \caption{Membership operation on a \cm sketch}\label{alg:countmin-memb}
   \KwData{$\kmer$; $\mathit{sketch}$, the \cm sketch, $\mathit{threshold}$, the threshold for the presence of a \kmer in the \dBG}
   \Return{$\mathit{sketch}.query(\kmer) \geq \mathit{threshold}$}
+  \paguso{Use identificadores mais curtos pras variáveis, tipo $C$: the \cm sketch, $t$: presence threshold. Essas mesmas letras devem ser usadas na explicação no corpo do texto. Este algoritmo em particular pode ser omitido pq é só um teste, e não justifica colocar um Algoritmo separado só pra isso.}
 \end{algorithm}
 
-\section{\dBCM}
+\section{The \dB\cm sketch}
 \label{sec:debruijncountmin}
 
 % - Representation (what goes in each cell)
@@ -128,20 +142,19 @@ if the count surpasses this threshold, the \kmer is considered to be present in 
 \asq{Como nós vamos falar das out-edges tanto no \dBCM quanto no \dBHT, poderia ser interessante fazer uma sessão ou subsessão acima
 falando sobre o conceito de forma que ele seja apenas referenciado nessas sessões?}
 
+
 In order to leverage the benefits of using a \cm representation of the \dBG while also improving its navigability, we introduce a modified
-version of the \cm sketch, which we call the \dBCM, that allows the sketch to be queried not only for \kmer counts, but also for the
-out-edges from the \dBG associated with that \kmer. \toconsider{The goal with this modification is to reduce the number of false positives
+version\change{ of the \cm sketch, which we call}{, called} the \keyterm{\dB\cm}, or \dBCM for short, \change{that allows the sketch to be queried}{allowing for querying} not only for \kmer counts, but also for the
+\change[sugiro trocar pela versão sem hífen, mais simples e comum]{out-edges}{outedges}  from the \remove{\dBG associated with that \kmer}{corresponding nodes in the graph}. \toconsider{The goal with this modification is to reduce the number of false positives
 by querying only the neighbors that are known to possibly exist for that \kmer. This would avoid false paths to be traversed, improving
-the trustworthyness of the graph.}
+the trustworthyness of the graph.}\paguso{Sugiro assim: primeiro vc move a explicação de como usar o \cm para \dBG para o início desta Seção (como sugerido acima). Neste ponto, vc pode mencionar que isso permite apenas identificar os nós reais, mas para navegar vc precisa consultar todas as possíveis outeges, o que é lento e abre espaço para FP. Daí vc tem o gancho para introduzir a modificação de guardar essas arestas na própria matriz.}
 
-To store the additional information, we expand the \cm sketch such that each cell in the matrix stores not only the counter,
-but also a set of out-edges. The structure, then, provides an interface to \emph{increment} the counters associated with a given key by one,
-and an interface to \emph{add an out-edge} to the sets associated with a given key. The increment operation is performed in the same way as in
-a regular \cm sketch, and the algorithm for the add edge operation can be seen in Algorithm \ref{alg:addOutEdge}.
 
-Furthermore, the \dBCM must accomodate this new information in its query operation. In order to do this, the sketch returns not only
-the minimum value of the counters, but also the intersection of the sets of out-edges. The algorithm for the updated query operation is
-described in Algorithm \ref{alg:query}.
+To store the additional information, we expand the \cm sketch such that each cell $C[i,j]$ in the matrix stores not only the counter,
+but also a set of out-edges $C[i,j].E$. The structure then provides an \change{interface}{operation} to \change[que tal manter a interface básica com mesmo nome?]{\emph{increment}}{\emph{update}} the counters associated with a given \change{key}{\kmer} by one,
+and an \change{interface}{operation} to \emph{add an out-edge} to the \change[which sets???]{sets}{cells} associated with a given \change{key}{\kmer}. The \change{increment}{update} operation is \change{performed in the same way as in
+a regular \cm sketch}{the same as in a regular \cm}, and the \change{algorithm}{procedure} for \change{the add edge operation}{adding an edge} can be seen in Algorithm~\ref{alg:addOutEdge}.
+
 
 \begin{algorithm}[htbp]
     \caption{Add an out-edge to a \kmer in a \dBCM}\label{alg:addOutEdge}
@@ -149,36 +162,48 @@ described in Algorithm \ref{alg:query}.
     \For{$i = 1, \ldots, D$}{
       $\mathit{CountMin}[i][h_i(\text{k-mer})].\mathit{outEdges} \gets \mathit{CountMin}[i][h_i(\text{k-mer})].\mathit{outEdges} \cup \mathit{outEdge}$\;
     }
+\paguso{Eu acho que seria bom tornar as entradas mais explícitas e com nomes mais simples, como as letras usadas na descrição do texto. Algo tipo: \textbf{Input:} $C$ the \dBCM, $x$ the \kmer, $a\in\{\A,\C,\G,\T\}$ the outedge label. Daí a instrução fica algo como $C[i,h_i(x)].E\gets C[i, h_i(x)].E \cup \{a\}$. Fica mais compacto e faz um link com o texto. Algumas coisas nos teus pseudocódigos tão muito ``códigos''.}
 \end{algorithm}
 
-From a practical perspective, due to a node only ever having 4 possible out-edges (corresponding to the 4 bases $\{\A, \C, \G, \T\}$),
-the set storing them can be represented by a bit vector indicating whether each of these possible edges is present. An edge is added
-by setting the corresponding bit, and the intersection is obtained by performing the bitwise AND operation. This allows both set of
-out-edges and the counter to be stored together in a single integer. \toconsider{When using a $k$ such that $4^k > |S|$, the each \kmer in $S$
-is expected to appear only once. As such, it is expected to appear a number of times equals to the coverage $C$ in the reads. Considering
-that $C$ is not a very high value (commonly below $200$} \asq{Citation Needed?}\toconsider{), each counter can be represented by a 12-bit
-integer, accounting for the expected count for all real \kmers, as well as any possible collisions.}
+Furthermore, the \dBCM must accommodate this new information in its query operation. \change{In order to do this, the}{The} sketch now returns not only
+the minimum value of the counters, but also the intersection of the sets of out-edges\change{. The algorithm for the updated query operation is
+described}{, as shown in} in Algorithm~\ref{alg:query}.
 
 \begin{algorithm}
-    \caption{Query a \kmer in a \dBCM}\label{alg:query}
-    $\mathit{count} \gets \mathit{inf}$\;
-    $\mathit{outEdges} \gets \{\A, \C, \G, \T\}$\;
-    \For{$i = 1, \ldots, D$}{
-      $\mathit{count} \gets \min(\mathit{count}, \mathit{CountMin}[i][h_i(\text{k-mer})].\mathit{count})$\;
-      $\mathit{outEdges} \gets \mathit{outEdges} \cap \mathit{CountMin}[i][h_i(\text{k-mer})].\mathit{outEdges}$\;
-    }
-    \Return{$(\mathit{count}, \mathit{outEdges})$}
+	\caption{Query a \kmer in a \dBCM}\label{alg:query}
+	$\mathit{count} \gets \mathit{inf}$\;
+	$\mathit{outEdges} \gets \{\A, \C, \G, \T\}$\;
+	\For{$i = 1, \ldots, D$}{
+		$\mathit{count} \gets \min(\mathit{count}, \mathit{CountMin}[i][h_i(\text{k-mer})].\mathit{count})$\;
+		$\mathit{outEdges} \gets \mathit{outEdges} \cap \mathit{CountMin}[i][h_i(\text{k-mer})].\mathit{outEdges}$\;
+	}
+	\Return{$(\mathit{count}, \mathit{outEdges})$}
+	\paguso{revisão input e  notação como falei no algoritmo acima}
 \end{algorithm}
 
-\subsection{As a representation of a \dBG}
 
-As with the \cm sketch, a \dBCM sketch can be queried for membership by comparing the count associated with a given \kmer to a threshold
-for presence (i.e. the \kmer is considered present if it appeared $T$ or more times in the reads). This structure can be navigated from
+From a practical perspective, due to a node \change{only ever having 4 possible}{having at most four} out-edges corresponding to the bases $\{\A, \C, \G, \T\}$,
+the set storing them can be represented \change{by a bit vector}{with four bits} indicating whether each \change{of these possible edges}{them} is present. An edge is added
+by setting the corresponding bit, and the intersection is obtained by performing the bitwise AND operation. \change{This allows both}{Moreover the} set of
+out-edges and the counter \change{to be stored}{are packed} together in a single \paguso{16-bit???} integer.\paguso{valia a pena uma figurinha simples aqui com o layout desse inteiro} \toconsider{When using a $k$ such that $4^k > |S|$, the each \kmer in $S$
+is expected to appear only once. As such, it is expected to appear a number of times equals to the coverage $C$ in the reads. Considering
+that $C$ is not a very high value (commonly below $200$} \asq{Citation Needed?}\toconsider{), each counter can be represented by a 12-bit
+integer, accounting for the expected count for all real \kmers, as well as any possible collisions.}\paguso{Sim, acho que deve justificar quantos bits usa e por que.}
+
+
+
+\subsection{As a representation of a \dBG}
+\paguso{Mudar seção para Using the \dBCM as a navigational structure}
+
+\remove[Essa discussão detalhada do threshold tá redundante.]{As with the \cm sketch, a \dBCM sketch can be queried for membership by comparing the count associated with a given \kmer to a threshold
+for presence (i.e. the \kmer is considered present if it appeared $T$ or more times in the reads).} This structure can be navigated from
 an initial set of \kmers by querying for their out-edges and then querying each of their neighbors, repeating this when a neighbor is
 found to be in the graph. \toconsider{By storing the out-edges, we expect some neighbors to never be explored, reducing the chances of finding
 a false path on the graph.}
 
-\section{Hashtable}
+\paguso{Esta seção deveria focar sobre como pode ser feito um percurso no grafo usando \dBCM. Primeiro vc explica como percorrer a partir de um nó inicial dado. Depois vc explica como candidatos a nós iniciais podem ser obtidos.}
+
+\section{A space-efficiente Hashtable representation for \dBG{s}}
 \label{sec:debruijnhashtable}
 % - Structure
 %   - fingerprint
@@ -189,6 +214,7 @@ a false path on the graph.}
 %   - Add node/edge
 %   - Query node/edge/star 
 % - Analysis 
+\paguso{repetindo, é necessário ter discutindo *antes* como essa coisa da hashtable vai colar com o \dBCM, senão isso parece que caiu do céu como uma coisa separada}
 
 We also propose a new hashtable-based representation for the \dBG that is made more efficient by not storing the \kmer. Instead,
 a fingerprint generated from the \kmer is stored, along with the set of out edges as described in Section \ref{sec:debruijncountmin}.
