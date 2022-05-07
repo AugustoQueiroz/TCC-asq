@@ -96,6 +96,38 @@ The consctruction and membership query operations are the minimum necessary, as 
 
 We propose two new probabilistic NDS-based representations for the \dBG: the \dB \cm (\dBCM), and the \dBHT. The \dBCM aims at performing online \kmer counting in a structure that can be traversed through the use of a probabilistic neighborhood query in a space-efficient manner \asq{reference the khmer or FastEtch?}. The \dBHT forgoes \kmer counting and any form of filtering in exchange for improved space-efficiency in a hashtable-based representation. Both structures aim at improving navigability on the graph by storing a set of outedges with each \kmer, allowing for \toconsider{near-}constant time neighborhood queries. These two structures can be used in tandem to leverage the benefits of each one individually: The \dBCM is constructed online as the reads are made available. Once all the reads are processed, the \dBHT is constructed by traversing the \dBCM and adding the found \kmer{s} and their outedges to the hashtable-based representation.\asq{Não faria mais sentido passar de novo pelas reads e adicionar apenas os \kmer{s} das reads que são considerados presentes? Afinal, existe uma chance de que o traversal vai passar por falsos positivos que sequer estavam nas reads. Acredito que existem duas linhas de defesa desse modelo atual: 1. como a taxa de falsos positivos vai estar mais associado a vizinhança do que ao acesso aleatório, é bem possível que falsos positivos das reads nunca sejam visitados, enquanto que \kmer{s} reais que sequer estão presentes nas reads sejam considerados como presentes por colisões, de forma que há uma chance de reduzir falsos positivos e negativos em relação a só passar pelas reads. De toda forma seria interessante uma forma de formalizar ou pelo menos testar essa hipotese}
 
+\begin{algorithm}
+  \caption{Pipeline using a \dBCM to construct a \dBHT}\label{alg:pipeline}
+  \KwData{$R$, a set of sequencing reads}
+  $\mathit{dBCM} \gets$ Empty \dBCM sketch\;
+  \For{$\mathit{read} \in R$}{
+    $\mathit{previous\_\kmer} \gets \emptyset$\;
+    \For{$\mathit{kmer} \in \mathit{read}$}{
+      $\mathit{dBCM}.\mathit{increment}(\kmer)$\;
+      \If{$\mathit{dBCM}.\mathit{query}(\kmer).\mathit{count} \geq T$}{
+        $outEdge \gets \kmer[-1]$\;
+        $\mathit{dBCM}.\mathit{addOutEdge}(\mathit{previous\_\kmer}, outEdge)$\;
+      }
+      $\mathit{previous\_\kmer} \gets \kmer$\;
+    }
+    $\mathit{previous\_\kmer} \gets \emptyset$\;
+    \For{$\mathit{kmer} \in \mathit{reverse\_complement(read)}$}{
+      $\mathit{dBCM}.\mathit{increment}(\kmer)$\;
+      \If{$\mathit{dBCM}.\mathit{query}(\kmer).\mathit{count} \geq T$}{
+        $outEdge \gets \kmer[-1]$\;
+        $\mathit{dBCM}.\mathit{addOutEdge}(\mathit{previous\_\kmer}, outEdge)$\;
+      }
+      $\mathit{previous\_\kmer} \gets \kmer$\;
+    }
+  }
+  $\mathit{dBHT} \gets$ Empty \dBHT\;
+  \For{$\kmer \in \mathit{dBCM}.\kmer{s}$}{
+    $\mathit{dBHT}.\mathit{insert}(\kmer)$\;
+    $\mathit{dBHT}[\kmer].\mathit{outEdges} \gets \mathit{dBCM}[\kmer].\mathit{outEdges}$\;
+  }
+  \Return{$\mathit{dBHT}$}
+\end{algorithm}
+
 \section{\cm}
 \label{sec:countmin}
 
@@ -335,48 +367,6 @@ escrever que os $n$ bits mais significativos são escolhidos?}
   \caption{Fingerprint Function}\label{alg:fingerprint}
   \KwData{$\mathit{key}$}
   \Return{$(11400714819323198485 \times \mathit{key}) >> 61$}
-\end{algorithm}
-
-\section{A pipeline using the \dBCM and the \dBHT}
-
-% Sequence ---(insert)---> Mod \cm ---(traverse)---> Hashtable 
-
-Beyond the two isolated datastructures to represent the \dBG, we also propose a way to use both of them in tandem in order to obtain
-the benefits of both. In this pipeline, the sequencing reads are processed and inserted into the \dBCM as they are made available,
-such that the \dBG can be constructed online. Once the reads are all processed in this manner, and a navigatable version of the graph 
-has been constructed, it can be traversed, with all of its nodes being, then, inserted in a \dBHT. In this way, a \dBCM is effectively
-compressed into a \dBHT. This pipeline is formalized in Algorithm \ref{alg:pipeline}.
-
-\begin{algorithm}
-  \caption{Pipeline using a \dBCM to construct a \dBHT}\label{alg:pipeline}
-  \KwData{$R$, a set of sequencing reads}
-  $\mathit{dBCM} \gets$ Empty \dBCM sketch\;
-  \For{$\mathit{read} \in R$}{
-    $\mathit{previous\_\kmer} \gets \emptyset$\;
-    \For{$\mathit{kmer} \in \mathit{read}$}{
-      $\mathit{dBCM}.\mathit{increment}(\kmer)$\;
-      \If{$\mathit{dBCM}.\mathit{query}(\kmer).\mathit{count} \geq T$}{
-        $outEdge \gets \kmer[-1]$\;
-        $\mathit{dBCM}.\mathit{addOutEdge}(\mathit{previous\_\kmer}, outEdge)$\;
-      }
-      $\mathit{previous\_\kmer} \gets \kmer$\;
-    }
-    $\mathit{previous\_\kmer} \gets \emptyset$\;
-    \For{$\mathit{kmer} \in \mathit{reverse\_complement(read)}$}{
-      $\mathit{dBCM}.\mathit{increment}(\kmer)$\;
-      \If{$\mathit{dBCM}.\mathit{query}(\kmer).\mathit{count} \geq T$}{
-        $outEdge \gets \kmer[-1]$\;
-        $\mathit{dBCM}.\mathit{addOutEdge}(\mathit{previous\_\kmer}, outEdge)$\;
-      }
-      $\mathit{previous\_\kmer} \gets \kmer$\;
-    }
-  }
-  $\mathit{dBHT} \gets$ Empty \dBHT\;
-  \For{$\kmer \in \mathit{dBCM}.\kmer{s}$}{
-    $\mathit{dBHT}.\mathit{insert}(\kmer)$\;
-    $\mathit{dBHT}[\kmer].\mathit{outEdges} \gets \mathit{dBCM}[\kmer].\mathit{outEdges}$\;
-  }
-  \Return{$\mathit{dBHT}$}
 \end{algorithm}
 
 \section{Experiments}
