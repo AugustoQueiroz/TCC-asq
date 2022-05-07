@@ -12,11 +12,12 @@
 \usepackage[normalem]{ulem}
 \usepackage{paralist}
 
+
 \newcommand{\prob}{\ensuremath{\mathrm{Pr}}}
 \newcommand{\dB}{de~Bruijn\xspace}
 \newcommand{\dBG}{de~Bruijn graph\xspace}
 \newcommand{\dBCM}{DBCM\xspace}
-\newcommand{\dBHT}{de~Bruijn Hashtable\xspace}
+\newcommand{\dBHT}{DBHT\xspace}
 \newcommand{\cm}{CountMin\xspace}
 \newcommand{\kmer}{\mbox{$k$-mer}\xspace}
 \newcommand{\kmers}{\mbox{$k$-mers}\xspace}
@@ -39,7 +40,7 @@
 \newcommand{\remove}[2][]{\color{magenta}{\sout{#2}(\textit{#1})}\color{black}}
 \newcommand{\change}[3][]{\remove[#1]{#2}{#3}}
 
-\newcommand{\readset}{\strsetname{R}\xspace}
+\newcommand{\readset}{\strsetname{X}\xspace}
 
 \university{Universidade Federal de Pernambuco}
 \institute{Centro de Informática}
@@ -59,6 +60,8 @@
     \presentationpage
 
     \mainmatter
+	\linenumbers
+	\doublespacing
     \chapter{Introduction}
     \include{chapter2}
     \include{chapter3}
