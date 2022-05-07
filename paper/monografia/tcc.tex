@@ -1,6 +1,7 @@
 \documentclass[bsc,en]{ufpethesis}
 
 \usepackage[ruled]{algorithm2e}
+\SetKwInOut{Input}{Input}\SetKwInOut{Output}{Output}
 \usepackage{algpseudocode}
 \usepackage{amsmath}
 \usepackage{xspace}
@@ -11,6 +12,9 @@
 \usepackage{outlines}
 \usepackage[normalem]{ulem}
 \usepackage{paralist}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
 
 \newcommand{\prob}{\ensuremath{\mathrm{Pr}}}
 \newcommand{\dB}{de~Bruijn\xspace}
@@ -19,7 +23,6 @@
 \newcommand{\dBHT}{de~Bruijn Hashtable\xspace}
 \newcommand{\cm}{CountMin\xspace}
 \newcommand{\kmer}{\mbox{$k$-mer}\xspace}
-\newcommand{\kmers}{\mbox{$k$-mers}\xspace}
 \newcommand{\chr}[1]{\ensuremath{\mathtt{#1}}}
 \newcommand{\A}{\chr{A}}
 \newcommand{\C}{\chr{C}}
@@ -57,12 +60,13 @@
     \frontmatter
     \frontpage
     \presentationpage
+    \tableofcontents
 
     \mainmatter
     \chapter{Introduction}
     \include{chapter2}
     \include{chapter3}
-    \chapter{Results}
+    \include{chapter4}
     \chapter{Conclusion}
 
     \backmatter
