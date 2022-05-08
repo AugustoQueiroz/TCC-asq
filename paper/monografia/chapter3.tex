@@ -412,7 +412,7 @@ The \kmer is hashed using the Fibonacci hashing algorithm \cite{Skarupke2018}, w
 
 \subsection{Fingerprint}\label{sec:fingerprint}
 
-We obtain a 3-bit fingerprint by performing a modified version of the Fibonacci hashing algorithm: We use the hashing function described above for the range addressable by a 64-bit integer. Because the multiplication result will overflow, we can skip the modulo operation as it is performed implicitly. Then we take the three most significant bits of the result as the fingerprint. We choose the most significant bits because, as observed by Skarupke, they present the best avalanche effect behavior (i.e. flipping any one bit individually from the input causes each bit in the output to have close to 50\% change of flipping as well) \cite{Skarupke2018}.
+We obtain a 3-bit fingerprint by performing a modified version of the Fibonacci hashing algorithm: We use the hashing function described above for the range addressable by a 64-bit integer. Because the multiplication result will overflow, we can skip the modulo operation as it is performed implicitly. Then we take the three most significant bits of the result as the fingerprint. We choose the most significant bits because, as observed by Skarupke, they present the best avalanche behavior (i.e. flipping any one bit individually from the input causes each bit in the output to have close to 50\% change of flipping as well) \cite{Skarupke2018}.
 
 In practice this fingerprint function is very computationally efficient due to it foregoing the modulo operation and using a bitwise shift operation to extract the most significant bits. The result can be seen in Algorithm~\ref{alg:fingerprint}.
 
