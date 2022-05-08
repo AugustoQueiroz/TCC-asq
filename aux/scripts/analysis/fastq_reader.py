@@ -47,6 +47,7 @@ class FastQParser:
         self.sequences = []
         with open(fastq_file_path) as fastq_file:
             for i, line in enumerate(fastq_file):
+                print(i, end='\r')
                 self.parse_line(line)
 
         if self.current_step != self.ParserStep.ID:

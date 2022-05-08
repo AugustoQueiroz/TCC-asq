@@ -14,7 +14,8 @@
  * @return The hashing result in the range 0 to indexSize-1
  */
 size_t polynomialHashing(size_t A, size_t B, size_t indexSize, size_t key) {
-    return mod_sum(mod_mult(A, key, LARGE_PRIME), B, LARGE_PRIME) % indexSize;
+    // return mod_sum(mod_mult(A, key, LARGE_PRIME), B, LARGE_PRIME) % indexSize;
+	return (A*key + B) % LARGE_PRIME % indexSize;
 }
 
 /**

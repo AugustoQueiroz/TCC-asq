@@ -26,7 +26,8 @@ parser.add_argument('-t', '--presence-threshold', type=int, nargs='+', help='The
 
 # ..
 parser.add_argument('-exe', '--executable', type=str, help='The path to the executable to be used.', required=True)
-parser.add_argument('-nexe', '--navigation-executable', type=str, help='The path to the navigation executable to be used.')
+parser.add_argument('-nexe', '--navigation-executable', type=str, default=None, help='The path to the navigation executable to be used.')
+parser.add_argument('-cexe', '--counting-executable', type=str, default=None, help='The path to the executable that perform k-mer counting.')
 
 # Experiments to Run
 experiments_group = parser.add_argument_group('Experiments to run')
@@ -80,79 +81,54 @@ class DataSetHandler:
     def get_k_mers(self, k):
         return set(self.get_k_mer_counts(k).keys())
 
+class ExperimentExecutables:
+    def __init__(self, construction_executable: str, counting_executable: str = None, traversal_executable: str = None):
+        self.construction_executable = construction_executable
+        self.counting_executable = counting_executable
+        self.traversal_executable = traversal_executable
+
 class Experiment:
     valid_experiments = ['false_positive', 'false_negative']
 
-    def __init__(self, D, W, k, presence_threshold, experiments_to_run, dataset_handler, path_to_exe, path_to_navigation_exe):
+    def __init__(self, D, W, k, presence_threshold, experiments_to_run, dataset_handler, executables: ExperimentExecutables):
         self.D = D
         self.W = W
         self.k = k
         self.presence_threshold = presence_threshold
+        self.experiment_name = f'K{k}W{W}D{D}T{presence_threshold}'
         self.experiments_to_run = experiments_to_run
         self.dataset_handler = dataset_handler
         self.results = {}
 
-        self.path_to_exe = path_to_exe
-        self.path_to_navigation_exe = path_to_navigation_exe
+        self.executables = executables
 
     def run(self):
-        run_command = f'{self.path_to_exe} {self.k} {self.dataset_handler.read_length} {self.W} {self.D} {self.presence_threshold} < {self.dataset_handler.reads_file}'
+        self.run_construction()
+        if self.executables.counting_executable:
+            self.run_counting()
+        if self.executables.traversal_executable:
+            self.run_traversal()
+    
+    def run_construction(self):
+        run_command = f'{self.executables.construction_executable} {self.k} {self.dataset_handler.read_length} {self.W} {self.D} {self.presence_threshold} < {self.dataset_handler.reads_file}'
         print(f'Executing: {run_command}')
         os.system(run_command)
-        mv_command = f'mv sketch.bin K{self.k}W{self.W}D{self.D}T{self.presence_threshold}.sketch'
+        mv_command = f'mv sketch.bin {self.experiment_name}.sketch'
         print(f'Executing: {mv_command}')
         os.system(mv_command)
-        mv_command = f'mv starting-kmers.txt K{self.k}W{self.W}D{self.D}T{self.presence_threshold}.starting'
+        mv_command = f'mv starting-kmers.txt {self.experiment_name}.starting'
         print(f'Executing: {mv_command}')
         os.system(mv_command)
 
-        self.run_navigation()
-
-    def run_navigation(self):
-        run_command = f'{self.path_to_navigation_exe} {self.k} K{self.k}W{self.W}D{self.D}T{self.presence_threshold}.sketch K{self.k}W{self.W}D{self.D}T{self.presence_threshold}.starting K{self.k}W{self.W}D{self.D}T{self.presence_threshold}.results {self.presence_threshold}'
+    def run_counting(self):
+        run_command = f'{self.executables.counting_executable} {self.k} {self.dataset_handler.reads_file} {self.experiment_name}.sketch {self.experiment_name}.counts'
         print(f'Executing: {run_command}')
         os.system(run_command)
 
-    def something(self):
-        actual_kmer_counts = self.dataset_handler.get_k_mer_counts(self.k)
-        navigatable_kmers = self.results['sketch'].navigatable_k_mers(set(read[:self.k] for read in self.dataset_handler.get_reads()), self.presence_threshold)
-        present_kmers = set(filter(lambda kmer: navigatable_kmers[kmer][0] >= self.presence_threshold, navigatable_kmers))
-
-        self.results['actual_kmer_counts'] = actual_kmer_counts
-        self.results['navigatable_kmers'] = navigatable_kmers
-
-        print(f'Total possible distinct k-mers: {4**self.k}')
-        print(f'Actual distinct k-mer count: {len(actual_kmer_counts)}')
-        print(f'Navigatable distinct k-mer count: {len(navigatable_kmers)}')
-        if len(actual_kmer_counts) > len(navigatable_kmers):
-            print(f'Unnavigated k-mers from reads: {set(actual_kmer_counts) - set(navigatable_kmers)}')
-        print(f'Present distinct k-mer count: {len(present_kmers)}')
-
-        false_positive_kmers = self.get_false_positives()
-        print(f'False Positives: {len(false_positive_kmers)}')
-        print(f'\tRate (fp / navigated): {100*(len(false_positive_kmers) / len(present_kmers))}%')
-
-        false_negative_kmers = self.get_false_negatives()
-        print(f'False Negatives: {len(false_negative_kmers)}')
-        print(f'\tRate (fn / actual count): {100*(len(false_negative_kmers) / len(actual_kmer_counts))}%')
-    
-    def get_false_positives(self):
-        kmers_found = set(filter(lambda kmer: self.results['navigatable_kmers'][kmer][0] >= self.presence_threshold, self.results['navigatable_kmers']))
-        kmers_present = set(self.results['actual_kmer_counts'])
-
-        return kmers_found - kmers_present
-    
-    def get_false_negatives(self):
-        kmers_found = set(filter(lambda kmer: self.results['navigatable_kmers'][kmer][0] >= self.presence_threshold, self.results['navigatable_kmers']))
-        kmers_present = set(self.results['actual_kmer_counts'])
-
-        return kmers_present - kmers_found
-
-    def save_results(self, output_dir):
-        with open(os.path.join(output_dir, f'K{self.k}W{self.W}D{self.D}T{self.presence_threshold}'), 'w') as results_file:
-            results_file.write(f'{self.results["navigatable_kmers"]}\n')
-            results_file.write(f'{len(self.get_false_positives())}\n')
-            results_file.write(f'{len(self.get_false_negatives())}\n')
+    def run_traversal(self):
+        run_command = f'{self.executables.traversal_executable} {self.k} {self.experiment_name}.sketch {self.experiment_name}.starting {self.experiment_name}.results {self.presence_threshold}'
+        print(f'Executing: {run_command}')
+        os.system(run_command)
     
 class ExperimentSet:
     def __init__(self, args, dataset_handler):
@@ -160,19 +136,16 @@ class ExperimentSet:
         self.experiments = []
 
         experiments_to_run = list(map(lambda experiment: vars(args)[experiment], Experiment.valid_experiments))
+        executables = ExperimentExecutables(self.args.executable, self.args.counting_executable, self.args.navigation_executable)
 
         variations = product(args.D, args.W, args.k, args.presence_threshold)
         for variation in variations:
-            experiment = Experiment(*variation, experiments_to_run, dataset_handler, self.args.executable, self.args.navigation_executable)
+            experiment = Experiment(*variation, experiments_to_run, dataset_handler, executables)
             self.experiments.append(experiment)
     
     def run(self):
         with mp.Pool(self.args.threads) as pool:
             pool.map(Experiment.run, self.experiments)
-
-    def save_results(self):
-        for experiment in self.experiments:
-            experiment.save_results(self.args.output_dir)
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -185,7 +158,10 @@ if __name__ == '__main__':
     if args.synthetic_dataset_generator:
         args.synthetic_dataset_generator = os.path.abspath(args.synthetic_dataset_generator)
     args.executable = os.path.abspath(args.executable)
-    args.navigation_executable = os.path.abspath(args.navigation_executable)
+    if args.counting_executable:
+        args.counting_executable = os.path.abspath(args.counting_executable)
+    if args.navigation_executable:
+        args.navigation_executable = os.path.abspath(args.navigation_executable)
     args.output_dir = os.path.abspath(args.output_dir)
 
     #
@@ -199,4 +175,3 @@ if __name__ == '__main__':
 
     experiment_set = ExperimentSet(args, dataset_handler)
     experiment_set.run()
-    # experiment_set.save_results()

@@ -139,7 +139,7 @@ class DeBruijnCountMin:
 if __name__ == '__main__':
     sketch = DeBruijnCountMin.from_file('./sketch.bin')
     print(sketch)
-    sketch.count_frequencies()
+    # sketch.count_frequencies()
     sketch.print_counts()
     # to_navigate_from = { "CATGAATT" }
     # navigated = set()
