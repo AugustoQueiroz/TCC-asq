@@ -1,0 +1,11 @@
+\chapter{Conclusion}
+
+\section{Easier Traversal}
+
+The use of outedges reduces the number of nodes visited during traversal because neighbors that are known not to exist arent queried for, reducing the number of false positive neighbors found. Beyond improving the trustworthiness of the traversal, this also improves memory usage: since the traversal uses a queue of nodes to explore, the more nodes are added to the queue the more memory is use that isn't really needed. This could force the use of disk for storing the frontier, which would have a big impact in time efficiency of the traversal.
+
+\section{Future Works}
+
+\begin{enumerate}
+\item item
+\end{enumerate}
