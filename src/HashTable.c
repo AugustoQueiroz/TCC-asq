@@ -5,6 +5,20 @@
 #include "Hashing.h"
 #include "HashTable.h"
 
+struct HashTable* createHashTable(size_t tableSize) {
+    struct HashTable* dBHT = (struct HashTable*)malloc(sizeof(struct HashTable));
+    dBHT->indexSize = tableSize;
+    dBHT->table = (uint8_t*)calloc(sizeof(uint8_t), tableSize);
+    dBHT->hashFunction = fibonacciHash;
+    dBHT->fingerprintFunction = fibonacciFingerprint;
+    return dBHT;
+}
+
+void deleteHashTable(struct HashTable* dBHT) {
+    free(dBHT->table);
+    free(dBHT);
+}
+
 void insertIntoHashTable(struct HashTable* hashTable, size_t key) {
     size_t hash = hashTable->hashFunction(key, hashTable->indexSize);
     size_t fingerprint = hashTable->fingerprintFunction(key);
@@ -75,4 +89,10 @@ uint8_t queryHashTable(struct HashTable* hashTable, size_t key) {
     }
 
     return hashTable->table[index] & 0b1111;
+}
+
+void saveHashTable(struct HashTable* dBHT, const char* outputFilePath) {
+    FILE* outputFile = fopen(outputFilePath, "wb");
+    fwrite(&dBHT->indexSize, sizeof(size_t), 1, outputFile);
+    fwrite(&dBHT->table, sizeof(uint8_t), dBHT->indexSize, outputFile);
 }

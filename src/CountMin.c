@@ -142,6 +142,11 @@ void saveDeBruijnCountMin(struct DeBruijnCountMin* dBCM, FILE* outputFile) {
     }
 }
 
+/**
+ * @brief Load the de Bruijn CountMin sketch from a file in disk
+ * 
+ * @param inputFilePath The path to the file in which the dBCM is represented
+ */
 struct DeBruijnCountMin* loadDeBruijnCountMin(const char* inputFilePath) {
     FILE* inputFile = fopen(inputFilePath, "r");
     struct DeBruijnCountMin* dBCM = (struct DeBruijnCountMin*) malloc(sizeof(struct DeBruijnCountMin));
@@ -161,4 +166,8 @@ struct DeBruijnCountMin* loadDeBruijnCountMin(const char* inputFilePath) {
     }
     fclose(inputFile);
     return dBCM;
+}
+
+bool isMemberOfDeBruijnCountMin(struct DeBruijnCountMin* dBCM, size_t kmerCode, size_t presence_threshold) {
+    return queryDeBruijnCountMin(dBCM, kmerCode) >= presence_threshold;
 }

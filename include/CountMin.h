@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #define COUNTER_MASK 0xFFF
 
@@ -23,5 +24,6 @@ uint16_t queryDeBruijnCountMin(struct DeBruijnCountMin* dBCM, size_t key);
 void dumpTable(struct DeBruijnCountMin* dBCM, FILE* dumpFile);
 void saveDeBruijnCountMin(struct DeBruijnCountMin* dBCM, FILE* outputFile);
 struct DeBruijnCountMin* loadDeBruijnCountMin(const char* inputFilePath);
+bool isMemberOfDeBruijnCountMin(struct DeBruijnCountMin* dBCM, size_t kmerCode, size_t presence_threshold);
 
 #endif

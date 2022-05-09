@@ -33,6 +33,9 @@ traversal: traversal.cpp $(TRAVERSALOBJ)
 counting: counting.cpp $(TRAVERSALOBJ)
 	g++ -o $(BUILDDIR)/$@ $^ $(CFLAGS) $(LIBS)
 
+construct-hashtable: ConstructDBHTFromDBCM.cpp $(TRAVERSALOBJ) HashTable.o
+	g++ -o $(BUILDDIR)/$@ $^ $(CFLAGS) $(LIBS)
+
 .PHONY: clean
 
 clean:
