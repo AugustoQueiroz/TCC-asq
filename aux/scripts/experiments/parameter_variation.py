@@ -30,9 +30,7 @@ parser.add_argument('-nexe', '--navigation-executable', type=str, default=None, 
 parser.add_argument('-cexe', '--counting-executable', type=str, default=None, help='The path to the executable that perform k-mer counting.')
 
 # Experiments to Run
-experiments_group = parser.add_argument_group('Experiments to run')
-parser.add_argument('-fp', '--false-positive', action='store_true', help='Run the false positive experiment.')
-parser.add_argument('-fn', '--false-negative', action='store_true', help='Run the false negative experiment.')
+parser.add_argument('--steps', type=int, nargs='+', default=[1, 2, 3], help='1 = dBCM construction, 2 = kmer counting, 3 = dBHT construction and traversal')
 
 # Extra
 parser.add_argument('--threads', type=int, help='The number of threads to be used.', default=mp.cpu_count())
@@ -90,23 +88,24 @@ class ExperimentExecutables:
 class Experiment:
     valid_experiments = ['false_positive', 'false_negative']
 
-    def __init__(self, D, W, k, presence_threshold, experiments_to_run, dataset_handler, executables: ExperimentExecutables):
+    def __init__(self, D, W, k, presence_threshold, steps, dataset_handler, executables: ExperimentExecutables):
         self.D = D
         self.W = W
         self.k = k
         self.presence_threshold = presence_threshold
         self.experiment_name = f'K{k}W{W}D{D}T{presence_threshold}'
-        self.experiments_to_run = experiments_to_run
+        self.steps = steps
         self.dataset_handler = dataset_handler
         self.results = {}
 
         self.executables = executables
 
     def run(self):
-        self.run_construction()
-        if self.executables.counting_executable:
+        if 1 in self.steps:
+            self.run_construction()
+        if self.executables.counting_executable and 2 in self.steps:
             self.run_counting()
-        if self.executables.traversal_executable:
+        if self.executables.traversal_executable and 3 in self.steps:
             self.run_traversal()
     
     def run_construction(self):
@@ -126,7 +125,7 @@ class Experiment:
         os.system(run_command)
 
     def run_traversal(self):
-        run_command = f'{self.executables.traversal_executable} {self.k} {self.experiment_name}.sketch {self.experiment_name}.starting {self.experiment_name}.results {self.presence_threshold}'
+        run_command = f'{self.executables.traversal_executable} {self.k} {self.experiment_name}.sketch {self.experiment_name}.starting {self.experiment_name}.dbcm.results {self.experiment_name}.dbht.results {self.presence_threshold}'
         print(f'Executing: {run_command}')
         os.system(run_command)
     
@@ -135,12 +134,11 @@ class ExperimentSet:
         self.args = args
         self.experiments = []
 
-        experiments_to_run = list(map(lambda experiment: vars(args)[experiment], Experiment.valid_experiments))
         executables = ExperimentExecutables(self.args.executable, self.args.counting_executable, self.args.navigation_executable)
 
         variations = product(args.D, args.W, args.k, args.presence_threshold)
         for variation in variations:
-            experiment = Experiment(*variation, experiments_to_run, dataset_handler, executables)
+            experiment = Experiment(*variation, self.args.steps, dataset_handler, executables)
             self.experiments.append(experiment)
     
     def run(self):
