@@ -419,7 +419,7 @@ In practice this fingerprint function is very computationally efficient due to i
 \begin{algorithm}
   \caption{$\mathit{fingerprint(X)}$}\label{alg:fingerprint}
   \Input{$X$, the key to fingerprint}
-  \Return{$(X \times \mathit{round}(\frac{2^64}{\phi})) >> 61$}
+  \Return{$(X \times \mathit{round}(\frac{2^{64}}{\phi})) >> 61$}
 \end{algorithm}
 
 \subsection{Using the \dBHT}
