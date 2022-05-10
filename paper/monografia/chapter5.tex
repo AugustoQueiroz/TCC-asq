@@ -4,6 +4,10 @@
 
 The use of outedges reduces the number of nodes visited during traversal because neighbors that are known not to exist arent queried for, reducing the number of false positive neighbors found. Beyond improving the trustworthiness of the traversal, this also improves memory usage: since the traversal uses a queue of nodes to explore, the more nodes are added to the queue the more memory is use that isn't really needed. This could force the use of disk for storing the frontier, which would have a big impact in time efficiency of the traversal.
 
+\section{\dBCM is still far from succint}
+
+Although the \dBCM presented positive results in counting and traversal, it is still a structure that demands a high amount of memory to store, requiring $O(\frac{c}{t} \times \log \frac{1}{\delta} \times 32)$ bits.
+
 \section{Future Works}
 
 \begin{enumerate}
