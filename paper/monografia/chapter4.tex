@@ -12,11 +12,7 @@ In practice we will show that this is an overestimate, as the sketch seems to pe
 
 \asq{Is it possible to create an expression for the false positive rate during traversal? It would depend on (a) the chance that a false \kmer is added to the starting set (so the chance that a false \kmer that appears at the beginning of a read is considered high-frequency) and (b) the chance that a real \kmer has a false edge pointing to a false \kmer}
 
-\section{\emph{E.~Coli} + ART Illumina}
-
-\subsection{\kmer counts}
-
-\subsection{The \dBCM as a \dBG representation}
+\section{The \dBCM as a \dBG representation}
 
 We started by evaluating how well the \dBCM performs the task of \kmer counting, comparing the distribution of frequencies, and observing the average error. However, because the goal of this data structure is to allow categorization of \kmer{s} as high- or low-frequency, more than obtaining exact \kmer counts, we take a special interest in evaluating how much the miscounts impact in differentiation between the two categories. To do this, we categorize the \kmer{s} according to a series of thresholds $t$, using both the exact frequency for each \kmer and the frequency estimated by the \dBCM. Let $H$ be the set of \kmer{s} categorized as high-frequency, and $K$ be the set of \kmer{s} found in the reference genome \strname{S} and its reverse complement \strname{\overline{S}}. We then generate $F_P = H \setminus K$, the set of spurious \kmer{s} that were considered to be high-frequency (false positives), and $F_N = K \setminus H$, the set of true \kmer{s} that were not considered to be high-frequency (false negatives). By analysing how the sizes of these sets varies as a function of $t$ we find the optimal threshold for differentiating the two categories.
 
@@ -75,7 +71,7 @@ One interesting thing to note is that, with $W = 10M$, both the mean and the sta
 
 In Figure~\ref{fig:ecoli-art-W7500000} we replicate the results of the \dBCM from Figures~\ref{fig:ecoli-art-frequencies}~and~\ref{fig:ecoli-art-thresholds} for $W = 7.5M$, showing the other extreme of the range. \asq{Passar por aqui de novo, mas para mostrar o outro lado da range o correto seria mostrar $W = 5M$, e $W = 7M$ já apresenta um erro significativamente maior de forma que para representar o extremo ainda positivo, faria mais sentido usar $W = 10M$.}
 
-\subsubsection{Traversal of the \dBCM}
+\section{Traversal of the \dBCM}
 \label{sec:results-dbcm-traversal}
 
 The previous results suggest that the \dBCM is possibly an apt representation of the \dBG as an MDS, with its expected false positive rate for $W = 20M$ being below $20\%$, as can be extrapolated from the percentage of spurious \kmer{s} categorized as high-frequency. Although not ideal, it is likely not high enough to \toconsider{disrupt} usage of the graph \cite{Pell2012}. However, we expect the addition of outedges to improve on the navigability of the graph, resulting in an even lower false positive rate in practice, as the graph is traversed.
@@ -101,10 +97,10 @@ Figure~\ref{fig:ecoli-art-traversal-W-queriedfound} presents the number of \kmer
 	\caption{Number of (a) \kmer{s} queried and found during traversal and (b) false positives}\label{fig:ecoli-art-traversal-W}
 \end{figure}
 
-\subsubsection{Construction of the \dBHT from the \dBCM}
+\section{Construction of the \dBHT from the \dBCM}
 
 \asq{Trazer informações aqui sobre o tempo necessário para a construção da nova estrutura}
 
-\subsubsection{Traversal of the \dBHT}
+\section{Traversal of the \dBHT}
 
 \asq{Trazer os mesmos gráficos da Seção~\ref{sec:results-dbcm-traversal} sendo que para a \dBHT. Falar sobre como ela tem uma taxa de falsos positivos maior do que a \dBCM, apesar de apenas os nós visitados na \dBCM serem adicionados na \dBHT e as arestas ainda passarem por uma limpeza (arestaas que não apontam para um nó real no \dBCM não são adicionadas na \dBHT). Isso provavelmente acontece porque usar 8 hashes distintos previne mais colisões do que apenas um hash e um fingerprint.}
