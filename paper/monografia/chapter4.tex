@@ -18,7 +18,7 @@ We started by evaluating how well the \dBCM performs the task of \kmer counting,
 
 Because the parameter $W$ has an important impact on the magnitude of the expected overcount, we analyze how they affect the error by comparing the mean and standard deviation for this metric accross varying values of $W$.
 
-We have used $D = 8$ as it gives a high degree of confidence in Equation~\ref{eq:cm-prob} (0.4\% chance of a miscount being greater than $\epsilon F$).
+We have used $D = 8$ as it gives a high degree of confidence in Equation~\ref{eq:cm-prob} (0.04\% chance of a miscount being greater than $\epsilon F$).
 
 We selected an initial value of $W$ by estimating $t = 40$ as a good threshold value due to it being equidistant from the expected frequency of real \kmer{s} ($80$), and of spurious \kmer{s} ($1$). We then made $W = \frac{2F}{t} = 20M$. The distributions of the exact frequencies and those estimated by the resulting \dBCM sketch are presented side-by-side in Figure~\ref{fig:ecoli-art-frequencies}. We can see that the estimated frequencies are shifted right in relation to the exact frequencies, expected from the fact that the \dBCM will err by overcounting. However, we can see that the distribution remains clearly bimodal. Therefore, it is possible to choose a value $t$ that divides the \kmer{s} into the two categories.
 
@@ -70,6 +70,21 @@ One interesting thing to note is that, with $W = 10M$, both the mean and the sta
 \end{figure}
 
 In Figure~\ref{fig:ecoli-art-W7500000} we replicate the results of the \dBCM from Figures~\ref{fig:ecoli-art-frequencies}~and~\ref{fig:ecoli-art-thresholds} for $W = 7.5M$, showing the other extreme of the range. \asq{Passar por aqui de novo, mas para mostrar o outro lado da range o correto seria mostrar $W = 5M$, e $W = 7M$ já apresenta um erro significativamente maior de forma que para representar o extremo ainda positivo, faria mais sentido usar $W = 10M$.}
+
+\begin{figure}[htbp]
+    \centering
+    \caption{}\label{fig:ecoli-art-W7500000}
+\end{figure}
+
+\asq{Falar aqui sobre diminuir $D$?}
+
+\asq{Teria sido possivel gerar algum valor que não seja o erro ou o desvio padrão que permita definir o quão bem aquele valor de $W$ consegue dividir os \kmer{s} nas duas categorias? Algo tipo: fazer a variação do $t$ e aí encontrar o $t$ que maximiza a diferença entre o percentual de \kmer{s} reais inclusos e o percentual de \kmer{s} espúrios, e aí usar essa diferença de percentual para determinar o quão bem aquele valor de $W$ consegue diferenciar as duas categorias?}
+
+\subsection{Memory Usage}
+
+We can express the number of bits per \kmer needed to represent the \dBG allowing for an expected false positive rate---the chance that a spurious \kmer will be considered high-frequency---$\delta$ in terms of the sequencing coverage $c$, and the presence threshold $t$ to be used. The total memory used is $16 \times W \times D$ bits, and we expect there to be $|\strname{S}|$ distinct \kmer{s} in the sequence. Because we add \kmer{s} both in forward and reverse complement direction, approximately $2 \times |\strname{S}|$ distinct \kmer{s} are represented in the \dBG. Benefiting from the fact that the majority of spurious \kmer{s} appear only once or twice in the reads, we can consider that they will only be considered high-frequency when they are miscounted by almost $t$. As such, we can express the false positive rate as $\prob[C.\mathit{query}(X) - f(X) > t]$, and use Equation~\ref{eq:cm-prob} to establish a relation between the size of the \dBCM, determined by $W$ and $D$, and the false positive rate in terms of $t$ by making $\epsilon F = t$. Because $F \approx c \times |\strname{S}|$, we can express $W = \frac{2 \times c \times |\strname{S}|}{t}$, while $D = \log(\frac{1}{\delta})$ remains the same. The total size of the \dBCM, then, is $16 \times \frac{2 \times c \times |\strname{S}|}{t} \times \log(\frac{1}{\delta})$ bits. Since we expect around $2 \times |\strname{S}|$ distinct \kmer{s} to be represented in the \dBG, we arrive at approximately $16 \times \lceil \frac{c}{t} \rceil \times \lceil \log(\frac{1}{\delta}) \rceil$ bits per \kmer. Choosing $t = \frac{c}{2}$ and a desired false positive rate of $1\%$, we expect the \dBCM to need $147$ bits per \kmer.
+
+\asq{Um problema sério dessa sessão é que, na prática, a taxa de falsos positivos vai ser mais alta do que o valor definido. Isso acontece porque existe uma quantidade de \kmer{s} espúrios que tem um contagem maior do que 1 ou 2, de forma que a garantia de $C.\mathit{query}(X) - f(X) \leq t$ é uma garantia fraca. Para eliminar esses \kmer{s} seria necessário definir o erro máximo aceito como um valor menor do que o threshold de presença (i.e. $C.\mathit{query}(X) - f(X) \leq t - \beta$). Não sei se tem alguma forma de definir esse valor de forma sistemática (e.g. qual é o menor threshold para o qual, baseado na contagem real, esperamos cortar $90\%$ dos \kmer{s} espúrios?) Talvez seja possível chegar a tal expressão baseado na probabilidade do erro, e a probabilidade de dois erros distintos gerarem o mesmo \kmer, mas acredito que seria uma expressão complexa.}
 
 \section{Traversal of the \dBCM}
 \label{sec:results-dbcm-traversal}
