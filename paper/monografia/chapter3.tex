@@ -32,20 +32,19 @@ In order to leverage the benefits of an NDS in reducing the impact of the false 
 \subsection{The \cm sketch}
 \label{sec:countmin}
 
-The \cm sketch \cite{Cormode2005} is a sublinear data structure for event frequency mapping.
-It offers two basic operations
+The \cm sketch \cite{Cormode2005} is a sublinear data structure for event count estimation. Given a stream of events $\strsetname{X} = \{(x_i, c_i) | i \in \mathbb{N}\}$, where $c_i \geq 0$ is the number of occurrences of $x_i$, it offers two basic operations
 \begin{compactenum}
-\item $update(e, f)$, and
-\item $query(e)$,
+\item $update(x, c)$, and
+\item $query(x)$,
 \end{compactenum}
-respectively for informing the occurrence of an event $e$ with frequency $f$, and for obtaining an estimate of the accumulated frequency of event $e$ up to that point.
+respectively for informing $c$ occurrences of an event $x$, and for obtaining an estimate of the accumulated frequency of event $x$ up to that point.
 
 The sketch is composed of a $d\times w$ matrix of counters $C$, and a set of $d$ pairwise-independent hash functions $h_0\ldots h_{d-1}$, such that each $h_i$ maps an event to one of the $w$ cells in row $i$.
 Updating an event is done by passing it through the hash functions for each row, and then incrementing the counters in
-the mapped positions $h_i(e)$ accordingly. 
+the mapped positions $h_i(x)$ accordingly. 
 We consider the simpler case where we only report individual event occurrences, so that counters are always incremented by one.
 Querying the structure consists in retrieving the value of the counters associated with the key event in each row,  and then returning
-the minimum value among them, that is $\min\{C[i,h_i(e)]; i=0\ldots d-1$\}.
+the minimum value among them, that is $\min\{C[i,h_i(x)]; i=0\ldots d-1$\}.
 Figure \ref{fig:countminexample} presents a visualization of the \cm sketch.
 
 \begin{figure}[htbp]
@@ -56,18 +55,18 @@ Figure \ref{fig:countminexample} presents a visualization of the \cm sketch.
 \paguso{A ideia da figura está boa, mas precisa aumentar a fonte pra não ficar ilegível. Se não couber, simplifica a parte do incremento. Muda o label de Increment para Update.}
 \end{figure}
 
-It is important to notice that the \cm might overestimate the frequency of an event due to hash collisions, since more than one event might be mapped to the same cell of the matrix. However, the pairwise independence requirement ensures that, for any row $i$ and any two distinct events $e\neq e'$,
+It is important to notice that the \cm might overestimate the frequency of an event due to hash collisions, since more than one event might be mapped to the same cell of the matrix. However, the pairwise independence requirement ensures that, for any row $i$ and any two distinct events $x\neq x'$,
 \begin{equation*}
-\prob[h_i(e)=h_i(e')] = \frac{1}{w},
+\prob[h_i(x)=h_i(x')] = \frac{1}{w},
 \end{equation*}
 with this probability being computed over all possible choices of the hash function.
 Hence, by setting $w$ appropriately, we can control the expected number of collisions per row, and likewise, by choosing a sufficiently large $d$, we can control for the probability of having at least one row without collisions for a given event. In general, for two given parameters $\epsilon, \delta \in (0,1)$, by setting 
-$w=2/\epsilon$ and $d=\log1/\delta$, we have
+$w=O(2/\epsilon)$ and $d=O(\log1/\delta)$, we have
 \begin{equation}
 \label{eq:cm-prob}
-\prob[C.\mathit{query}(e) - f(e) > \epsilon F] < \delta,
+\prob[C.\mathit{query}(x) - c(x) > \epsilon \|\strsetname{X}\|_1] < \delta,
 \end{equation}
-where $f(e)$ represents the true frequency of $e$, and $F=\sum_{e_i}f(e_i)$ is the true total event count. Put another way, we can have the estimate error relative to the total event count to be `small' (no more than $\epsilon$) with `good' (at least $1-\delta$) probability.
+where $c(x)$ represents the true frequency of $x$, and $\|\strsetname{X}\|_1=\sum_{x_i}c(x_i)$ is the true total event count. Put another way, we can have the estimate error relative to the total event count to be `small' (no more than $\epsilon$) with `good' (at least $1-\delta$) probability.
 
 \subsection{Using the \cm for counting \kmer{s}}
 \label{subsec:cm-countingkmers}
@@ -76,7 +75,7 @@ Zhang \emph{et al.} proposed using a \cm sketch to count \kmer{s} \cite{Zhang201
 
 
 Because the \kmer counts are used to determine if a \kmer should be added to the \dBG, as discussed in Section~\ref{subsec:dBG-selectingkmers}, a structure that can answer count queries can be extended to implement the membership query operation, with a \kmer $X$ being considered to be represented in the graph if $C.\mathit{query}(X).c \geq t$. 
-Assuming that the vast majority of low-frequency \kmers occur no more than once or twice in the input reads, in order for such a \kmer to be unduly considered as real (false positive), its \cm estimate would have to be off by about $t$ or more. Because the \cm overestimation error is at most $\epsilon F$ with probability at least $1-\delta$, according to Eq~\ref{eq:cm-prob}, by controlling this maximum error to be at most $t$, we have that the expected false positive rate is no more than $\delta$. This amounts to setting the \cm dimensions to $w=2/\epsilon = 2F/t$ and $d=1/\delta$.
+Assuming that the vast majority of low-frequency \kmers occur no more than once or twice in the input reads, in order for such a \kmer to be unduly considered as real (false positive), its \cm estimate would have to be off by about $t$ or more. Because the \cm overestimation error is at most $\epsilon F$ with probability at least $1-\delta$, according to Eq~\ref{eq:cm-prob}, by controlling this maximum error to be at most $t$, we have that the expected false positive rate is no more than $\delta$. This amounts to setting the \cm dimensions to $w=O(2/\epsilon) = 2F/t$ and $d=1/\delta$.
 
 
 %As the count returned by the \cm sketch can be overestimated by some error $\epsilon F$ with probability $\delta$ as established in Equation~\ref{eq:cm-prob}, we can arrive at an expression for the probability that a low-frequency \kmer will be considered to be a member of the \dBG by defining $\epsilon F = t$. This takes into account that most spurious \kmer{s} appear only once or twice in the reads, as discussed in Section~\ref{subsec:dBG-selectingkmers}. Due to the relationships between $w$ and $\epsilon$, and $d$ and $\delta$, we can decide the necessary size of the \cm sketch to achieve the desired false positive rate by making $\delta$ the desired rate, choosing $d = \log \frac{1}{\delta}$, and making $w = \frac{2}{\epsilon} = \frac{2F}{t}$.
@@ -294,7 +293,9 @@ To query the hashtable for a \kmer/node $X$, the same sequence of positions as i
 \end{algorithm}
 
 
-Adding an edge $X\stackrel{a}{\longrightarrow}Y$ to the \dBHT is similar to adding a \kmer node, and breaks down to, first, locating the slot $T[i]$ of the source node $X$, and then adding the corresponding edge label $a$ to its set of outedges. As before, this is done by setting the appropriate bit of the  4-bit pattern $T[i].E$. \remove[acho que isso aqui confunde desnecessariamente]{The \dBHT does not verify that an edge being added targets a node already present in the graph. This is done because this verification happens naturally when inserting the \kmer{s} sequentially from the reads (given \kmer{s} $X$ and $Y$ consecutive in a read, $X$ is inserted before $Y$, but the edge $X\stackrel{a}{\longrightarrow}Y$ is only inserted when $Y$ is inserted), and also in the pipeline we present, where \kmer{s} and edges are obtained by traversing the \dBCM representation of the graph and should be clear in Algorithm~\ref{alg:dbht-construct}.}
+Adding an edge $X\stackrel{a}{\longrightarrow}Y$ to the \dBHT is similar to adding a \kmer node, and breaks down to, first, locating the slot $T[i]$ of the source node $X$, and then adding the corresponding edge label $a$ to its set of outedges. As before, this is done by setting the appropriate bit of the  4-bit pattern $T[i].E$. This procedure is detailed in Algorithm~\ref{alg:ht-add-edge}. Note that if the node X is not represented in the \dBHT
+
+\remove[acho que isso aqui confunde desnecessariamente]{The \dBHT does not verify that an edge being added targets a node already present in the graph. This is done because this verification happens naturally when inserting the \kmer{s} sequentially from the reads (given \kmer{s} $X$ and $Y$ consecutive in a read, $X$ is inserted before $Y$, but the edge $X\stackrel{a}{\longrightarrow}Y$ is only inserted when $Y$ is inserted), and also in the pipeline we present, where \kmer{s} and edges are obtained by traversing the \dBCM representation of the graph and should be clear in Algorithm~\ref{alg:dbht-construct}.}
 
 
 \begin{algorithm}
@@ -412,72 +413,3 @@ We traverse \dBHT in a breadth-first manner from a starting set of \kmer{s} \str
   }
 	\Return{$Q$}
 \end{algorithm}
-
-
-\paguso{a partir daqui já deve ir pro Cap 4}
-
-\section{Experiments}
-
-\subsection{Metrics}
-
-\asq{Is accuracy the best term here? Why not precision, for example? Is there a more suitable term?}
-
-\subsubsection{Representation Accuracy of the \dBCM}
-
-The \dBCM has two aims: (1) counting the \kmer{s} from the reads, and (2) implementing a navigatable representation of a \dBG. Due to its probabilistic nature, however, it cannot achieve deterministic exactness in either of those aims. It becomes important, therefore, to evaluate how accurate it is at each of them. To do so, we compare its estimated count for each of the \kmer{s} in the reads to the \kmer{s} actual count. We also test the false positive and false negative rates of the sketch before traversal.
-
-\paragraph{Count Accuracy} To evaluate count accuracy, distribution of estimated counts agains that of actual counts. We also look at the mean and standard deviation of the count errors $\{C.query(X).c - f(X) ; X \in \readset\}$. Because the \cm sketch will only err by overestimation, the error is always a positive value, and therefore we can take its mean directly instead of using a method such as the mean squared error.
-
-\paragraph{False Positives} When evaluating the accuracy of the \dBCM, it makes sense to test how many of the spurious \kmer{s} present in \readset attained a count high enough to be considered represented in the graph. As such, we begin by defining the set of \kmer{s} from the sequence $K = \{X ; X \in \strname{S}\}$ and the set of nodes of $G$ as $V = \{X ; X \in \readset, C.\mathit{query}(X).c \geq t\}$. Then we obtain the set of false positives as $F_p = V \setminus K$ and define a false positive rate as $f_p = \frac{|F_p|}{|V|}$.
-
-\paragraph{False Negatives} Similarly to false positives, we can look at the \kmer{s} from the original sequence that are not represented in the graph because they don't reach the threshold $t$. Again we define the sets $K$ and $V$. Then, we obtain the set of false negatives as $F_n = K \setminus V$, and the false negative rate as $f_n = \frac{|F_n|}{|K|}$.
-
-\subsubsection{Graph Traversal}
-
-By implementing the \dBCM and \dBHT as navigational structures, however, we aim at reducing the impact of false positives as defined above by only querying for neighbors of known members. In this way, a false positive \kmer might never be queried if its in-neighbors are considered to not be represented in the graph, such that a true negative can stop a false positive from happening down the path. Conversely, a false negative can theoretically cause a true positive to never be queried, ultimately causing it to become a false negative as well.
-
-
-We define false positives and false negatives \emph{in traversal} in the same way as above, but changing the definition of the set $V$ to be the set of nodes \emph{visited} during traversal: $V = \{X ; X \in B.\mathit{traverse}(\strsetname{S}), B.\mathit{is\_member}(X)\}$. Then, as above, we have $F_p = V \setminus K$ and $f_p = \frac{|F_p|}{|V|}$, and $F_n = K \setminus V$ and $f_n = \frac{|F_n|}{|K|}$.
-
-\subsubsection{Time- and Space-Efficiency}
-
-We track the time needed to perform each step, as well as the total memory used.
-
-\subsection{\emph{E.~Coli}}
-
-We use the \emph{E.~Coli} genome \cite{ecoligenome} \asq{how to reference the genome?} as a benchmark through three different experiments. Firstly, we take the reference genome and generate a read set \readset without sequencing errors or reverse complements. Then, we add the presence of the reverse complements and, finally, we use the \emph{ART Illumina} toolkit \cite{Huang2011} to generate realistic reads from the genome, including sequencing errors and reverse complements.
-
-Through all of these experiments, we processed the reads by adding their \kmer{s} in a \dBCM sketch, then repeating the process for its reverse complement. The \kmer{s} were then counted exactly through the use of a hashtable, and the counts were saved along with the estimated counts from the sketch. Finally, we traversed the sketch, saving all the queried \kmer{s} along with the query result. A \dBHT was constructed as described in Section~\ref{subsubsec:dbht-construction}, and the resulting structure was traversed as well. With this we were able to analyse the metrics described above.
-
-\subsubsection{Synthetic Reads without Errors and Reverse Complements}
-
-Given the reference genome $S$, the length of each read, $L$, and the desired coverage $C$, the synthetic reads were generated by picking
-$\frac{|S| \times C}{L}$ substrings of $S$ at random. This is presented in algorithmic form in Algorithm \ref{alg:generate-reads}.
-
-\begin{algorithm}
-  \caption{Generate Reads}\label{alg:generate-reads}
-  \Input{$S$, the reference genome, $L$ the read length, $C$ the coverage}
-  \Output{A set of reads $\readset$}
-  $n \gets \frac{|S| \times C}{L}$\\
-  $\readset \gets \emptyset$\\
-  \For{$i \gets 1, \ldots, n$}{
-    $j \gets \mathit{random}(0, |S| - L)$\\
-    $\readset \gets \readset \cup \{S[j: j+L]\}$\\
-  }
-  \Return{$\readset$}
-\end{algorithm}
-
-\subsubsection{Synthetic Reads without Errors and with Reverse Complements}
-
-The same procedure was used as in the previous section, but each individual read had a 50\% chance of being generated from the reverse complement of the reference genome \strname{S}
-
-\subsubsection{Synthetic Reads with Errors}
-
-In order to simulate the reads as they would be produced by the sequencing process, we used the ART Illumina toolkit to generate
-synthetic reads from the \emph{E.~Coli} genome. The reads were generated using the following parameters:
-
-\begin{enumerate}
-\item \textbf{Sequencing System}: Illumina MiSeq v3
-\item \textbf{Read length}: \textit{250bp}
-\item \textbf{Coverage}: \textit{80x}
-\end{enumerate}

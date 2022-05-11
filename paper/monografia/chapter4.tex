@@ -1,8 +1,87 @@
 \chapter{Results}
 
+\section{The \dBCM as a \dBG representation}
+
+To assess how well the \dBCM can represent a \dBG when constructed from the raw sequencing reads, we first analyze how accurately it performs \kmer counting. We constructed a set of \dBCM instances with varying $w \in \{7.5M, 10M, \ldots 17.5M, 20M\}$ and $d \in \{6, 8\}$ parameters using, as an input, a set of synthetic reads generated from the \emph{E.~Coli} reference genome \cite{ecoligenome} using the \emph{ART Illumina} simulation toolkit \cite{Huang2011} with a coverage $c$ of $80x$. For each instance, we calculate individual count errors as $\Delta(X) = C.\mathit{query}(X) - c(X)$, and the mean and standard deviation of these errors across the instance. In Figure~\ref{fig:ecoli-art-dbcm-errors} we plot these two metrics as a function of $w$ for the two values of $d$.
+
+\begin{figure}[htb]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/e_coli-error_mean_stddev-K31-D6-T40}
+        \caption{$d = 6$}\label{fig:ecoli-art-dbcm-errors-d6}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/e_coli-error_mean_stddev-K31-D8-T40}
+        \caption{$d = 8$}\label{fig:ecoli-art-dbcm-errors-d8}
+    \end{subfigure}
+	\caption{\dBCM miscount mean and standard deviation as a function of $w$ for $d = 6$ and $d = 8$}\label{fig:ecoli-art-dbcm-errors}
+\end{figure}
+
+For $w \geq 10M$, we observe that both error mean and standard deviation are below $30$ regardless of $d$, such that we expect the majority, over $80\%$, of spurious \kmer{s} to have a count no greater than $60$, while real \kmer{s} are expected to have a count not much lower than $c=80$. This suggests that high- and low-frequency \kmer{s} are likely to still be discernible. To further determine how well the \dBCM can differentiate between these two categories, we select $w=10M$ and $d=6$, minimizing the memory used for the representation, and compare its count distribution for the \kmer{s} in the reads with the exact counts. This comparison can be observed in Figure~\ref{fig:ecoli-art-dbcm-counts}. Although the estimated counts distribution is shifted right due to overcount, we see two peaks, one between $2^3$ and $2^4$, and the other between $2^6$ and $2^7$, indicating the high- and low-frequency categories may still be discernible. An optimal threshold, however, is not as immediately clear as when we consider the exact count distribution.
+
+\begin{figure}[htb]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/e_coli-kmer_frequencies-exact-K31}
+        \caption{Exact}\label{fig:ecoli-art-dbcm-counts-exact}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/e_coli-kmer_frequencies-estimated-K31-W10000000-D6}
+        \caption{Estimated ($w = 12.5M, d = 6$)}\label{fig:ecoli-art-dbcm-counts-exact}
+    \end{subfigure}
+	\caption{\kmer count distribution}\label{fig:ecoli-art-dbcm-counts}
+\end{figure}
+
+To precisely determine how well we can categorize the \kmer{s} based on estimated count, we select a number of thresholds $t$ in the range $[1, 2c]$ and analyze the sensibility, i.e. percentage of true \kmer{s} idenfied as such, and false positive rate, i.e. percentage of false \kmer{s} erroneously identified as true, of using each one. The results are presented in Figure~\ref{fig:ecoli-art-dbcm-threshold-estimated}, where we can see that, without excluding any true \kmer{s} from the \dBG, we can filter out over $80\%$ of the spurious \kmer{s} from the reads by using $20 \leq t \leq 40$. However, comparing these results with the sensitivity and false positive rate if using the exact counts (Figure~\ref{fig:ecoli-art-dbcm-threshold-exact}), we can see that the number of false positives nearly doubles when keeping sensibility maximized. In the synthetic reads dataset used, this equates to nearly $9.7M$ spurious \kmer{s} being added to the \dBG, over $5M$ more than would be added using exact counts. In the following section we show that, despite this increase in number of spurious \kmer{s} represented in the \dBCM, only a fraction of them are reachable in traversal, such that this representation still succeeds in filtering out erroneous \kmer{s}.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/e_coli-threshold_exploration-K31-exact}
+        \caption{Exact counts}\label{fig:ecoli-art-dbcm-threshold-exact}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/e_coli-threshold_exploration-K31-W10000000-D6}
+        \caption{Estimated by \dBCM ($W=10M, D=8$)}\label{fig:ecoli-art-dbcm-threshold-estimated}
+    \end{subfigure}
+    \caption{Sensibility and False Positive Rate of a \dBCM with $w = 12.5M$ and $d = 6$ as a function of the presence threshold $t$}\label{fig:ecoli-art-dbcm-threshold}
+\end{figure}
+
+\section{Further filtering through traversal}
+
+AS discussed in Section~\ref{sec:pipeline}, we expect many of the spurious \kmer{s} inserted into the \dBG due to high count to be disconnected from the main component of the graph, composed of the real \kmer{s}. As such, the \kmer{s} categorized as high-frequency can further be filtered by traversing the graph from a starting set sampled from them
+
+2. Navegação pelo dBCM
+2.1. Navegação consegue melhorar FPR sem alterar sensibilidade?
+Fig. FPR \& Sensibility X W (t = 40) [navegação]
+2.3. Memória
+2.3.1. Teórico
+2.3.2. bits / kmer baseado nos \kmer{s} da navegação
+2.4. Tempo
+2.4.1. Construir, navegar
+
+3. Navegação da dBHT
+3.1. O quão próximo a dBHT consegue se manter da FPR do dBCM?
+Fig. FPR \& Sensibility X alpha (W = 10M, D = 6 e t = 40) [navegação]
+- $0.5 \leq alpha \leq 0.9$ (passo 0.05)
+2.3. Memória
+2.3.1. Teórico
+2.3.2. bits / kmer baseado nos \kmer{s} da navegação
+2.4. Tempo
+2.4.1. Construir, navegar
+
+
 \section{Theoretical Results}\asq{bad name}
 
 \asq{This feels like it should be in methodology?}
+
+$F => \|\readset\|_1$
 
 Relationship between $c$, $t$, and $W$: a false positive occurs when $C.\mathit{query}(X).c - f(X) \geq t$, so we set $\epsilon F < t \rightarrow \epsilon < \frac{t}{F}$ in order to use Equation~\ref{eq:cm-prob} to establish a false positive rate. Because of the relationship $W = \frac{2}{\epsilon}$, we can put $W$ in terms of $t$: $W > \frac{2F}{t}$. Finally, we expect $F \approx c \times |\strname{S}|$, such that $W > \frac{2 \times c \times |\strname{S}|}{t}$.
 
@@ -16,7 +95,7 @@ In practice we will show that this is an overestimate, as the sketch seems to pe
 
 We started by evaluating how well the \dBCM performs the task of \kmer counting, comparing the distribution of frequencies, and observing the average error. However, because the goal of this data structure is to allow categorization of \kmer{s} as high- or low-frequency, more than obtaining exact \kmer counts, we take a special interest in evaluating how much the miscounts impact in differentiation between the two categories. To do this, we categorize the \kmer{s} according to a series of thresholds $t$, using both the exact frequency for each \kmer and the frequency estimated by the \dBCM. Let $H$ be the set of \kmer{s} categorized as high-frequency, and $K$ be the set of \kmer{s} found in the reference genome \strname{S} and its reverse complement \strname{\overline{S}}. We then generate $F_P = H \setminus K$, the set of spurious \kmer{s} that were considered to be high-frequency (false positives), and $F_N = K \setminus H$, the set of true \kmer{s} that were not considered to be high-frequency (false negatives). By analysing how the sizes of these sets varies as a function of $t$ we find the optimal threshold for differentiating the two categories.
 
-Because the parameter $W$ has an important impact on the magnitude of the expected overcount, we analyze how they affect the error by comparing the mean and standard deviation for this metric accross varying values of $W$.
+Because the parameter $W$ has an important impact on the magnitude of the expected overcount, we analyze how they affect the error by comparing the mean and standard deviation for this metric across varying values of $W$.
 
 We have used $D = 8$ as it gives a high degree of confidence in Equation~\ref{eq:cm-prob} (0.04\% chance of a miscount being greater than $\epsilon F$).
 
