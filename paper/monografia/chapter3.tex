@@ -305,12 +305,11 @@ Adding an edge $X\stackrel{a}{\longrightarrow}Y$ to the \dBHT is similar to addi
   $i \gets h_X$\\
   \While{$T[i]$ is not empty}{
     \eIf{$T[i].f = f_X$}{
-      \Return{$a \in T[i].E$}
+      $T[i].E \gets T[i].E \cup \{a\}$\\
     }{
       $i \gets (i + 1) \mod m$\\
     }
   }
-  \Return{$\varnothing$}
 \end{algorithm}
 
 
