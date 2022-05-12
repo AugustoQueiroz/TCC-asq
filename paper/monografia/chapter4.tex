@@ -2,7 +2,7 @@
 
 \section{The \dBCM as a \dBG representation}
 
-To assess how well the \dBCM can represent a \dBG when constructed from the raw sequencing reads, we first analyze how accurately it performs \kmer counting. We constructed a set of \dBCM instances with varying $w \in \{7.5M, 10M, \ldots 17.5M, 20M\}$ and $d \in \{6, 8\}$ parameters using, as an input, a set of synthetic reads generated from the \emph{E.~Coli} reference genome \cite{ecoligenome} using the \emph{ART Illumina} simulation toolkit \cite{Huang2011} with a coverage $c$ of $80x$. For each instance, we calculate individual count errors as $\Delta(X) = C.\mathit{query}(X) - c(X)$, and the mean and standard deviation of these errors across the instance. In Figure~\ref{fig:ecoli-art-dbcm-errors} we plot these two metrics as a function of $w$ for the two values of $d$.
+To assess how well the \dBCM can represent a \dBG when constructed from the raw sequencing reads, we first analyze how accurately it performs \kmer counting. We constructed a set of \dBCM instances with varying dimensions $w \in \{7.5\text{M}, 10\text{M}, \ldots 17.5\text{M}, 20\text{M}\}$\footnote{$1\mega = 10^6$\paguso{ou seria $2^{20}$}} and $d \in \{6, 8\}$ from a set of synthetic reads generated from the \emph{E.~Coli} reference genome \cite{ecoligenome} using the \emph{ART Illumina} simulation toolkit \cite{Huang2011} with a coverage $c=80\times$. For each instance, we calculated the mean and standard deviation of the individual count errors $\Delta(X) = C.\mathit{query}(X) - c(X)$. In Figure~\ref{fig:ecoli-art-dbcm-errors} we plot these two metrics as a function of $w$ for the two values of $d$.
 
 \begin{figure}[htb]
     \centering
@@ -19,7 +19,10 @@ To assess how well the \dBCM can represent a \dBG when constructed from the raw 
 	\caption{\dBCM miscount mean and standard deviation as a function of $w$ for $d = 6$ and $d = 8$}\label{fig:ecoli-art-dbcm-errors}
 \end{figure}
 
-For $w \geq 10M$, we observe that both error mean and standard deviation are below $30$ regardless of $d$, such that we expect the majority, over $80\%$, of spurious \kmer{s} to have a count no greater than $60$, while real \kmer{s} are expected to have a count not much lower than $c=80$. This suggests that high- and low-frequency \kmer{s} are likely to still be discernible. To further determine how well the \dBCM can differentiate between these two categories, we select $w=10M$ and $d=6$, minimizing the memory used for the representation, and compare its count distribution for the \kmer{s} in the reads with the exact counts. This comparison can be observed in Figure~\ref{fig:ecoli-art-dbcm-counts}. Although the estimated counts distribution is shifted right due to overcount, we see two peaks, one between $2^3$ and $2^4$, and the other between $2^6$ and $2^7$, indicating the high- and low-frequency categories may still be discernible. An optimal threshold, however, is not as immediately clear as when we consider the exact count distribution.
+We observe only a slight improvement in the overestimation error mean and standard deviation for for $w\geq 10\mega$. However, we are not so much interested in the absolute counts per se, but rather as way of discerning real \kmers occurring in original sequence from spurious \kmers appearing only in the reads due to sequencing errors. In order to save memory, we would like to use the smallest values allowing for this separation.
+To check whether the \dBCM can effectively differentiate between these two categories, we select $w=10\mega$ and $d=6$ and compare the distribution of the count estimates with the actual values for the \kmer{s} in the reads. This comparison can be observed in Figure~\ref{fig:ecoli-art-dbcm-counts}. \paguso{seria bom indicar a quantidade de \kmers nas barrinhas pequenas da contagem exata. esse numero deveria ser próximo do número real de \kmers na sequência pra gente poder argumentar que os \kmers reais são os que têm alta frequência} Although the estimated counts distribution is shifted right due to overcount, we see two peaks, one between $2^3$ and $2^4$, and the other between $2^6$ and $2^7$, indicating the high- and low-frequency categories may still be discernible although a threshold is not as clear as with the exact counts.
+Combining these observations, we see that for $w \geq 10\mega$, both error mean and standard deviation are below $30$ regardless of $d$, such that we expect over $80\%$\paguso{de onde vem esse 80\%?}, of spurious \kmer{s} to have a count no greater than $60$, while real \kmer{s} are expected to have a count not much lower than $80$ (the coverage). This suggests that high- and low-frequency \kmer{s} are likely to still be discernible based on a threshold in the 30--60 range.
+
 
 \begin{figure}[htb]
     \centering
@@ -31,12 +34,13 @@ For $w \geq 10M$, we observe that both error mean and standard deviation are bel
     \begin{subfigure}{.5\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/e_coli-kmer_frequencies-estimated-K31-W10000000-D6}
-        \caption{Estimated ($w = 12.5M, d = 6$)}\label{fig:ecoli-art-dbcm-counts-exact}
+        \caption{Estimated ($w = 12.5\mega, d = 6$)}\label{fig:ecoli-art-dbcm-counts-exact}
+        \paguso{$w=10\mega$ ou $w=12.5\mega$???}
     \end{subfigure}
 	\caption{\kmer count distribution}\label{fig:ecoli-art-dbcm-counts}
 \end{figure}
 
-To precisely determine how well we can categorize the \kmer{s} based on estimated count, we select a number of thresholds $t$ in the range $[1, 2c]$ and analyze the sensibility, i.e. percentage of true \kmer{s} idenfied as such, and false positive rate, i.e. percentage of false \kmer{s} erroneously identified as true, of using each one. The results are presented in Figure~\ref{fig:ecoli-art-dbcm-threshold-estimated}, where we can see that, without excluding any true \kmer{s} from the \dBG, we can filter out over $80\%$ of the spurious \kmer{s} from the reads by using $20 \leq t \leq 40$. However, comparing these results with the sensitivity and false positive rate if using the exact counts (Figure~\ref{fig:ecoli-art-dbcm-threshold-exact}), we can see that the number of false positives nearly doubles when keeping sensibility maximized. In the synthetic reads dataset used, this equates to nearly $9.7M$ spurious \kmer{s} being added to the \dBG, over $5M$ more than would be added using exact counts. In the following section we show that, despite this increase in number of spurious \kmer{s} represented in the \dBCM, only a fraction of them are reachable in traversal, such that this representation still succeeds in filtering out erroneous \kmer{s}.
+Next we evaluate possible thresholds $t$ in the range $[1, 2c]$ by analyzing the \keyterm{true positive rate}, or \keyterm{sensitivity}, of the \dBCM, i.e. percentage of true \kmer{s} \change[definitivamente, vc adora as such kkk]{identified as such}{correctly identified}, as well as its \keyterm{false positive rate}, i.e. percentage of false \kmer{s} erroneously identified as true, using each one of those values. The results are presented in Figure~\ref{fig:ecoli-art-dbcm-threshold-estimated}, where we can see that, without excluding any true \kmer{s} from the \dBG, we can filter out over $80\%$ of the spurious \kmer{s} from the reads by using $20 \leq t \leq 40$. However, comparing these results with the sensitivity and false positive rate if using the exact counts (Figure~\ref{fig:ecoli-art-dbcm-threshold-exact}), we can see that the number of false positives nearly doubles when keeping sensibility maximized. In the synthetic reads dataset used, this equates to nearly $9.7\mega$ spurious \kmer{s} being added to the \dBG, over $5\mega$ more than would be added using exact counts. In the following section we show that, despite this increase in number of spurious \kmer{s} represented in the \dBCM, only a fraction of them are reachable in traversal, such that this representation still succeeds in filtering out erroneous \kmer{s}.\paguso{ficou bem legal este final}
 
 \begin{figure}[htbp]
     \centering
@@ -48,9 +52,9 @@ To precisely determine how well we can categorize the \kmer{s} based on estimate
     \begin{subfigure}{.5\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/e_coli-threshold_exploration-K31-W10000000-D6}
-        \caption{Estimated by \dBCM ($W=10M, D=8$)}\label{fig:ecoli-art-dbcm-threshold-estimated}
+        \caption{Estimated by \dBCM ($w=10\mega, d=8$)}\label{fig:ecoli-art-dbcm-threshold-estimated}
     \end{subfigure}
-    \caption{Sensibility and False Positive Rate of a \dBCM with $w = 12.5M$ and $d = 6$ as a function of the presence threshold $t$}\label{fig:ecoli-art-dbcm-threshold}
+    \caption{\change[kkkk]{Sensibility}{Sensitivity} and False Positive Rate of a \dBCM with $w = 12.5\mega$\paguso{é 10M ou 12.5M, afinal? é d=8 ou 8, afinal??} and $d = 6$ as a function of the presence threshold $t$}\label{fig:ecoli-art-dbcm-threshold}
 \end{figure}
 
 \section{Further filtering through traversal}
