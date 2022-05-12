@@ -13,4 +13,5 @@ Although the \dBCM presented positive results in counting and traversal, it is s
 \begin{enumerate}
 \item Generate contigs and report N50 score with \dBHT
 \item Because we perform traversal from a somewhat random subsample of the high-frequency \kmer{s}, there is a chance that some disconnected components of the graph are still visited due to one of their members being present in the starting set. Therefore, improvements in filtering the starting set, if possible, could further improve results.
+\item Use the \dBHT being constructed through traversal as the set of visited \kmer{s} and rerun the experiments of the \dBHT to see how it affects the results when not all \kmer{s} are guaranteed to be inserted
 \end{enumerate}
