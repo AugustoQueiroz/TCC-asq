@@ -1,4 +1,4 @@
-\chapter{State of the Art}
+\chapter{Related Works}
 
 \section{Outline}
 
@@ -98,8 +98,8 @@ Chikhi \emph{et al.} \cite{Chikhi2019} present the following set of operations c
   \item \emph{Insertion} of a new \kmer
   \item \emph{Deletion} of an existing \kmer.
   \item \emph{Membership query}: Given a \kmer $X$, returns true iff $X \in G$
-  \item \emph{Forward neighbor query}: Given a \kmer $X$ and a base $a$, returns true iff $X[1:k-1] \cdot a \in G$\footnote{We use $\cdot$ to represent the concatenation operation.}.\paguso{rever esser índices, está contando o último índice? Essa notação deve ser introduzida no Cap 2}
-  \item \emph{Backward neighbor query}: Given a \kmer $X$ and a base $a$, return true iff $a \cdot X[0:k-2] \in G$.
+  \item \emph{Forward neighbor query}: Given a \kmer $X$ and a base $a$, returns true iff $X[1:k] \cdot a \in G$\footnote{We use $\cdot$ to represent the concatenation operation, and the notation $x:y$ represents the range $[x,y)$}.\paguso{rever esser índices, está contando o último índice? Essa notação deve ser introduzida no Cap 2}
+  \item \emph{Backward neighbor query}: Given a \kmer $X$ and a base $a$, return true iff $a \cdot X[0:k-1] \in G$.
 \end{enumerate}
 
-Note that a representation that implements the \emph{construction} and \emph{membeship query} operation can use those to implement some version of the others (e.g. by reconstructing the graph with the desired insertion or deletion, or by querying for the membership of the desired neighbor). However, dynamic representations implement \emph{insertion} and \emph{deletion} operations that do not require the reconstruction of the graph, while NDSs don't rely on the membership query to establish if a given forward or backward neighbor is represented in the graph. For example, the neighborhood query described by Chikhi \emph{et al.} \cite{???} as defining NDSs can be implemented by performing \emph{forward} and \emph{backward neighbor queries} for all extensions of the given \kmer and then returning only those for which the result was $\mathit{true}$.
+Note that a representation that implements the \emph{construction} and \emph{membeship query} operation can use those to implement some version of the others (e.g. by reconstructing the graph with the desired insertion or deletion, or by querying for the membership of the desired neighbor). However, dynamic representations implement \emph{insertion} and \emph{deletion} operations that do not require the reconstruction of the graph, while NDSs don't rely on the membership query to establish if a given forward or backward neighbor is represented in the graph. For example, the neighborhood query described by Chikhi \emph{et al.} \cite{Chikhi2014} as defining NDSs can be implemented by performing \emph{forward} and \emph{backward neighbor queries} for all extensions of the given \kmer and then returning only those for which the result was $\mathit{true}$.

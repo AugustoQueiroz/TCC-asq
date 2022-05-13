@@ -215,10 +215,75 @@ abstract = {For the last 20 years, fragment assembly in DNA sequencing
     eprint = {https://academic.oup.com/bioinformatics/article-pdf/28/4/593/16911715/btr708.pdf},
 }
 
-@online{Skarupke2018,
+@misc{Skarupke2018,
   author = {Malte Skarupke},
   title = {Fibonacci Hashing: The Optimization that the World Forgot (or: a Better Alternative to Integer Modulo)},
   year = 2018,
-  url = {https://probablydance.com/2018/06/16/fibonacci-hashing-the-optimization-that-the-world-forgot-or-a-better-alternative-to-integer-modulo/amp/},
-  urldate = {2022-05-08}
+  howpublished = {\url{https://probablydance.com/2018/06/16/fibonacci-hashing-the-optimization-that-the-world-forgot-or-a-better-alternative-to-integer-modulo/amp/}},
+  note = {Accessed: 2022-05-08}
+}
+
+@misc{ecoligenome,
+   howpublished = {\url{http://ftp.ensemblgenomes.org/pub/bacteria/release-52/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655_gca_000005845/dna/}},
+   note = {Accessed: 2022-05-12}
+}
+
+@generic{Imelfort2009,
+   abstract = {The ability to sequence the DNA of an organism has become one of the most important tools in modern biological research. Until recently, the sequencing of even small model genomes required substantial funds and international collaboration. The development of 'second-generation' sequencing technology has increased the throughput and reduced the cost of sequence generation by several orders of magnitude. These new methods produce vast numbers of relatively short reads, usually at the expense of read accuracy. Since the first commercial second-generation sequencing system was produced by 454 Technologies and commercialised by Roche, several other companies including Illumina, Applied Biosystems, Helicos Biosciences and Pacific Biosciences have joined the competition. Because of the relatively high error rate and lack of assembly tools, short-read sequence technology has mainly been applied to the re-sequencing of genomes. However, some recent applications have focused on the de novo assembly of these data. De novo assembly remains the greatest challenge for DNA sequencing and there are specific problems for second generation sequencing which produces short reads with a high error rate. However, a number of different approaches for short-read assembly have been proposed and some have been implemented in working software. In this review, we compare the current approaches for second-generation genome sequencing, explore the future direction of this technology and the implications for plant genome research. © The Author 2009. Published by Oxford University Press.},
+   author = {Michael Imelfort and David Edwards},
+   doi = {10.1093/bib/bbp039},
+   issn = {14675463},
+   issue = {6},
+   journal = {Briefings in Bioinformatics},
+   keywords = {De novo assembly,Genome sequencing,Illumina,Next generation,Roche 454,Second generation},
+   pages = {609-618},
+   pmid = {19933209},
+   title = {De novo sequencing of plant genomes using second-generation technologies},
+   volume = {10},
+   year = {2009},
+}
+
+@inproceedings{Medvedev2007,
+   author = {Medvedev, Paul and Georgiou, Konstantinos and Myers, Gene and Brudno, Michael},
+   title = {Computability of Models for Sequence Assembly},
+   year = {2007},
+   isbn = {3540741259},
+   publisher = {Springer-Verlag},
+   address = {Berlin, Heidelberg},
+   abstract = {Graph-theoretic models have come to the forefront as some of the most powerful and practical methods for sequence assembly. Simultaneously, the computational hardness of the underlying graph algorithms has remained open. Here we present two theoretical results about the complexity of these models for sequence assembly. In the first part, we show sequence assembly to be NP-hard under two different models: string graphs and de Bruijn graphs. Together with an earlier result on the NP-hardness of overlap graphs, this demonstrates that all of the popular graph-theoretic sequence assembly paradigms are NP-hard. In our second result, we give the first, to our knowledge, optimal polynomial time algorithm for genome assembly that explicitly models the double-strandedness of DNA. We solve the Chinese Postman Problem on bidirected graphs using bidirected flow techniques and show to how to use it to find the shortest doublestranded DNA sequence which contains a given set of k-long words. This algorithm has applications to sequencing by hybridization and short read assembly.},
+   booktitle = {Proceedings of the 7th International Conference on Algorithms in Bioinformatics},
+   pages = {289–301},
+   numpages = {13},
+   location = {Philadelphia, PA},
+   series = {WABI'07}
+}
+
+@article{Giani2020,
+   title = {Long walk to genomics: History and current approaches to genome sequencing and assembly},
+   journal = {Computational and Structural Biotechnology Journal},
+   volume = {18},
+   pages = {9-19},
+   year = {2020},
+   issn = {2001-0370},
+   doi = {https://doi.org/10.1016/j.csbj.2019.11.002},
+   url = {https://www.sciencedirect.com/science/article/pii/S2001037019303277},
+   author = {Alice Maria Giani and Guido Roberto Gallo and Luca Gianfranceschi and Giulio Formenti},
+   keywords = {Genome assembly, Sequencing, Reference, Bioinformatics, Next-generation, Third-generation},
+   abstract = {Genomes represent the starting point of genetic studies. Since the discovery of DNA structure, scientists have devoted great efforts to determine their sequence in an exact way. In this review we provide a comprehensive historical background of the improvements in DNA sequencing technologies that have accompanied the major milestones in genome sequencing and assembly, ranging from early sequencing methods to Next-Generation Sequencing platforms. We then focus on the advantages and challenges of the current technologies and approaches, collectively known as Third Generation Sequencing. As these technical advancements have been accompanied by progress in analytical methods, we also review the bioinformatic tools currently employed in de novo genome assembly, as well as some applications of Third Generation Sequencing technologies and high-quality reference genomes.}
+}
+
+@generic{Miller2010,
+   abstract = {The emergence of next-generation sequencing platforms led to resurgence of research in whole-genome shotgun assembly algorithms and software. DNA sequencing data from the Roche 454, Illumina/Solexa, and ABI SOLiD platforms typically present shorter read lengths, higher coverage, and different error profiles compared with Sanger sequencing data. Since 2005, several assembly software packages have been created or revised specifically for de novo assembly of next-generation sequencing data. This review summarizes and compares the published descriptions of packages named SSAKE, SHARCGS, VCAKE, Newbler, Celera Assembler, Euler, Velvet, ABySS, AllPaths, and SOAPdenovo. More generally, it compares the two standard methods known as the de Bruijn graph approach and the overlap/layout/consensus approach to assembly. © 2010 Elsevier Inc.},
+   author = {Jason R. Miller and Sergey Koren and Granger Sutton},
+   doi = {10.1016/j.ygeno.2010.03.001},
+   issn = {08887543},
+   issue = {6},
+   journal = {Genomics},
+   keywords = {Genome assembly algorithms,Next-generation sequencing},
+   month = {6},
+   pages = {315-327},
+   pmid = {20211242},
+   title = {Assembly algorithms for next-generation sequencing data},
+   volume = {95},
+   year = {2010},
 }
