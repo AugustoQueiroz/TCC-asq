@@ -1,6 +1,10 @@
 \chapter{Conclusion}
 
-\section{Easier Traversal}
+\section{\cm{-based} \kmer counting can be used to filter spurious \kmer{s} from sequencing reads}
+
+We expand on the results presented by Zhang \emph{et al.} to show that overcounting resulting from using a \cm sketch to count \kmer{s} in the sequencing reads does not hinder categorization of the \kmer{s}.
+
+\section{Storing outedges improve traversal}
 
 The use of outedges reduces the number of nodes visited during traversal because neighbors that are known not to exist arent queried for, reducing the number of false positive neighbors found. Beyond improving the trustworthiness of the traversal, this also improves memory usage: since the traversal uses a queue of nodes to explore, the more nodes are added to the queue the more memory is use that isn't really needed. This could force the use of disk for storing the frontier, which would have a big impact in time efficiency of the traversal.
 
@@ -8,7 +12,17 @@ The use of outedges reduces the number of nodes visited during traversal because
 
 Although the \dBCM presented positive results in counting and traversal, it is still a structure that demands a high amount of memory to store, requiring $O(\frac{c}{t} \times \log \frac{1}{\delta} \times 32)$ bits.
 
+\section{\dBHT can succesfully represent a \dBG in as few as $9$ bits per \kmer}
+
 \section{Future Works}
+
+\subsection{Generating contigs and N50 score for the \dBHT}
+
+A natural next step is to use the \dBHT to generate maximal contigs and, from them, generate the N50 score, a metric defined as the length $l_0$ of the shortest contig such that all contigs with length $l \geq l_0$ cover at least $50\%$ of the assembly.
+
+\subsection{Use \dBHT as visited set during traversal of \dBCM}
+
+To traverse the \dBCM, we have used both a queue to store the nodes that should be visited, and a set to store the nodes that have been visited.In practice, this approach is not interesting as it ultimately requires representing the \dBG in memory as a set, in parallel to the succint representation being constructed, which is prohibitive in larger genomes. Although a representation that is more succint than a set, but less so than the \dBHT could be used, it would be interesting to see how using the \dBHT, as it is being constructed, as the set of visited nodes would affect its final results. Because the \dBHT allows for false positives, we expect some probability that a node will be considered to already have been visited in traversal, and, therefore, its outedges might not be represented in the graph. This could, in the best case, potentially lead to further filtering and, inthe worst case, cause loss in sensitivity, as the main component of the \dBG is broken up.
 
 \begin{enumerate}
 \item Generate contigs and report N50 score with \dBHT
