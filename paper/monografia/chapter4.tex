@@ -1,4 +1,4 @@
-\chapter{Results}
+\chapter{Results}\label{chap:results}
 
 We evaluate the \dBCM based on how well it can identify true \kmer{s} in the unprocessed reads (Section~\ref{sec:results-dbcm-counting}), as well as on how it can further filter out spurious \kmer{s} through traversal of the graph (Section~\ref{sec:results-dbcm-traversal}). We then evaluate how the false positive rate is affected when traversing the \dBHT built from the traversal of the \dBCM (Section~\ref{sec:results-dbht}). All the experiments described herein were carried out with synthetic reads generated using the \emph{ART Illumina} simulation toolkit \cite{Huang2011} of the \emph{E.~Coli} chromosomal DNA \cite{ecoligenome} with coverage $c = 80\times$ and reads of $250$ bases, resulting in approximately $1.5\mega$ distinct reads. The experiments were conducted on a Dell XPS 15 9575, with a $4.1$GHz Intel Core i7-80705G CPU and $16$GB of RAM, plus $8$GB of SSD swap.
 
