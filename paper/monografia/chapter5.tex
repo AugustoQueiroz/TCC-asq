@@ -2,30 +2,32 @@
 
 \section{\cm{-based} \kmer counting can be used to filter spurious \kmer{s} from sequencing reads}
 
-We expand on the results presented by Zhang \emph{et al.} to show that overcounting resulting from using a \cm sketch to count \kmer{s} in the sequencing reads does not hinder categorization of the \kmer{s}.
+We expand on the results presented by Zhang \emph{et al.} \cite{Zhang2014} to show that despite overcounting, we can still filter out most (over $80\%$) of spurious \kmer{s} based on the count estimate from a \cm sketch that has fewer cells, in total, than the number of distinct \kmer{s} in the reads, and uses only $16$ bits per cell. These results are similar to what \emph{khmer} achieves through iteratively truncating the reads at the first low-frequency \kmer \cite{Zhang2014}, i.e. \emph{read trimming}. However, filtering directly from the counts only requires that the reads be processed one time.
+
+\section{Filtering through traversal is very effective}
+
+We have also shown that traversing the \dBG generated from the high-frequency \kmer{s} further improves filtering of spurious \kmer{s} without affecting the number of real \kmer{s} represented. Therefore, although Ghosh \& Kalyanaraman \cite{Ghosh2019} present a framework for using the \cm sketch for online filtering of spurious \kmer{s} that allows the sketch to be considerably smaller, reducing the size of the \cm sketch much further than presented here hinders its ability to be successfully navigated, losing a very efficient second filter that removed nearly $98\%$ of the remaining spurious \kmer{s} after count-based filtering. This would decrease memory requirement during processing of the reads, but results in a less succint representation of the \dBG.
 
 \section{Storing outedges improve traversal}
 
-The use of outedges reduces the number of nodes visited during traversal because neighbors that are known not to exist arent queried for, reducing the number of false positive neighbors found. Beyond improving the trustworthiness of the traversal, this also improves memory usage: since the traversal uses a queue of nodes to explore, the more nodes are added to the queue the more memory is use that isn't really needed. This could force the use of disk for storing the frontier, which would have a big impact in time efficiency of the traversal.
-
-\section{\dBCM is still far from succint}
-
-Although the \dBCM presented positive results in counting and traversal, it is still a structure that demands a high amount of memory to store, requiring $O(\frac{c}{t} \times \log \frac{1}{\delta} \times 32)$ bits.
+We also see that, for both data structures used, the number of outedges stored for each node in the \dBG is low, with the vast majority having only one recorded outedge. Without using the outedges, and querying all four possible outneighbors of a given node, we would need to query between $2$ and $4\times$ as many \kmer{s}, just from the nodes represented in the \dBG. Storing the outedges, even with some chance of false positives, can, therefore, decrease the impact of the false positive rate associated with the membership query of either structure by stopping false \kmer{s} from ever being queried. Moreover, by reducing the number of queries that need to be made, storing the set of outedges also improves time-performance of traversal.
 
 \section{\dBHT can succesfully represent a \dBG in as few as $9$ bits per \kmer}
 
+Finally, we have shown that the \dBHT can represent a \dBG in as few as $9$ bits per \kmer with, at most, $16\%$ of the graph being composed of false \kmer{s} introduced by the probabilistic nature of the representation. Based on the exploration by Pell \emph{et al.} \cite{Pell2012}, we expect this number of false positives not to affect usability of the graph for assembly. We can reduce it, however, by increasing the size of the \dBHT. With $16$ bits per \kmer, we achieved a number of false positive nodes that is below $4\%$ of the total number of \kmer{s} represented in the graph.
+
+These results are comparable to current \dBG representations, that span from $4$ bits per \kmer to $24$ bits per \kmer \cite{Chikhi2013} \cite{Giani2020}.
+
 \section{Future Works}
+
+\subsection{Directly compare against similar works}
+
+It is important to compare the results obtained in this work against similar works. Notably, we would like to show that the \cm{-based} filter used in \emph{FastEtch} is less effective in filtering spurious \kmer{s} than the filtering pipeline we introduce, based on count and traversal. We would also like to show that despite providing a slightly less succint \dBG representation in the form of a \dBHT, this representation presents better performance than Bloom Filter based representations, due to both reducing the number of queries needed by avoiding the need to query all four neighbors of a node, as well as by reducing the number of hashing functions used to only two (hashing and fingerprint).
 
 \subsection{Generating contigs and N50 score for the \dBHT}
 
-A natural next step is to use the \dBHT to generate maximal contigs and, from them, generate the N50 score, a metric defined as the length $l_0$ of the shortest contig such that all contigs with length $l \geq l_0$ cover at least $50\%$ of the assembly.
+A natural next step is to use the \dBHT to generate maximal contigs and, from them, generate the N50 score, a metric defined as the length $l_0$ of the shortest contig such that all contigs with length $l \geq l_0$ cover at least $50\%$ of the assembly. The N50 score is used to determine que quality of an assembly in terms of contiguity. Based on the distribution of outedges observed during traversal of the \dBHT, we expect this representation to perform fairly well.
 
 \subsection{Use \dBHT as visited set during traversal of \dBCM}
 
-To traverse the \dBCM, we have used both a queue to store the nodes that should be visited, and a set to store the nodes that have been visited.In practice, this approach is not interesting as it ultimately requires representing the \dBG in memory as a set, in parallel to the succint representation being constructed, which is prohibitive in larger genomes. Although a representation that is more succint than a set, but less so than the \dBHT could be used, it would be interesting to see how using the \dBHT, as it is being constructed, as the set of visited nodes would affect its final results. Because the \dBHT allows for false positives, we expect some probability that a node will be considered to already have been visited in traversal, and, therefore, its outedges might not be represented in the graph. This could, in the best case, potentially lead to further filtering and, inthe worst case, cause loss in sensitivity, as the main component of the \dBG is broken up.
-
-\begin{enumerate}
-\item Generate contigs and report N50 score with \dBHT
-\item Because we perform traversal from a somewhat random subsample of the high-frequency \kmer{s}, there is a chance that some disconnected components of the graph are still visited due to one of their members being present in the starting set. Therefore, improvements in filtering the starting set, if possible, could further improve results.
-\item Use the \dBHT being constructed through traversal as the set of visited \kmer{s} and rerun the experiments of the \dBHT to see how it affects the results when not all \kmer{s} are guaranteed to be inserted
-\end{enumerate}
+To traverse the \dBCM, we have used both a queue to store the nodes that should be visited, and a set to store the nodes that have been visited.In practice, this approach is not interesting as it ultimately requires representing the \dBG in memory as a set, in parallel to the succint representation being constructed, which is prohibitive in larger genomes. Although a representation that is more succint than a set, but less so than the \dBHT could be used, it would be interesting to see how using the \dBHT, as it is being constructed, as the set of visited nodes would affect its final results. Because the \dBHT allows for false positives, we expect some probability that a node will be considered to already have been visited in traversal, and, therefore, its outedges might not be represented in the graph. This could, in the best case, potentially lead to further filtering and, in the worst case, cause loss in sensitivity, as the main component of the \dBG is broken up.
