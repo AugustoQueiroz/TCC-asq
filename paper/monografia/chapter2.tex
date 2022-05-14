@@ -1,10 +1,10 @@
-\chapter{Theoretical Foundation and Related Works}
+\chapter{Theoretical Foundation and Related Work}
 
-\changed{In this chapter we begin by setting some theoretical groundwork for better understanding \dBG{s} in the context of genome assembly. We then discuss some related works published about \kmer counting as well as succint representations of the \dBG.}
+\changed{In this chapter we begin by setting the theoretical groundwork for understanding \dBG{s} in the context of genome assembly. We then discuss some related work on \kmer counting as well as succinct representations of the \dBG.}
 
 \section{Notation}
 
-\changed{Throughout this work, we use lower-case symbols, such as $t$ and $c$, to represent scalar values. Uppercase symbols, such as $\strname{X}$ and $\strname{Y}$, represent strings. Finally, calligraphic uppercase symbols, such as $\readset$ and $\strsetname{S}$, are used to represent sets. Strings and sets are $0$-indexed, and the notation $X[i:j]$ represents the substring of $X$ from position $i$ up to, but not including, position $j$. $\cdot$ is used between two string, or a string and a character to represent the concatenation operagion, e.g. $X \cdot Y$ or $X \cdot b$.}
+\changed{Throughout this work, we use lower-case symbols, such as $t$ and $c$, to represent scalar values. Uppercase symbols, such as $\strname{X}$ and $\strname{Y}$, represent strings. Finally, calligraphic uppercase symbols, such as $\readset$ and $\strsetname{S}$, are used to represent sets. Strings and sets are $0$-indexed, and the notation $X[i:j]$ represents the substring of $X$ from position $i$ up to, but not including, position $j$. The concatenation of two strings $X$ and $Y$, or a string $X$ and a character $a$, are respectively denoted by $X\cdot Y$ and $X\cdot a$.}
 
 \section{\dBG{s}}
 \label{sec:dBG}
@@ -31,7 +31,7 @@ In genome sequencing, \dB graphs are used in the assembly process to represent t
 	\caption{Example of a \dBG. $k=4$}\label{fig:dbgexample}
 \end{figure}
 
-\subsection{Reverse Complements}
+\section{Reverse Complements}
 \label{subsec:dBG-reversecomplements}
 
 One difficulty of using \dBG{s} to represent DNA data is the presence of \keyterm{reverse complements}. When generating sequencing reads, the machine reads either of the two complementary strands of a fragment of the input DNA. That is, the output read may correspond to the sequence \strname{S} in the forward (5'-3') direction, or its reverse complement \strname{\overline{S}} in the backward (3'-5') direction, with
@@ -44,39 +44,39 @@ To deal with reverse complements, reads are processed twice, once in each direct
 % makes the graph symmetric; a forward traversal corresponds to a backwards traversal on the reverse complement path, and vice versa.``
 % \cite{Conway2011}
 
-\subsection{Selecting the \kmer{s} for the \dBG}
+\section{Selecting the \kmer{s} for the \dBG}
 \label{subsec:dBG-selectingkmers}
 
 Another difficulty of using a \dBG to represent DNA data is dealing with sequencing errors. During the sequencing process, there is a small error rate associated with reading any base from \strname{S} (0.1\%--1\% per base in Illumina \cite{Metzker2010}). As a result, many of the \kmer{s} extracted from the reads in \readset are erroneous. As discussed by Conway \& Bromage, this causes the number of spurious \kmer{s} to grow proportionally to the number of bases in the reads $|\readset|=\sum_{\strname{X}_i \in \readset} |\strname{X}_i|$, determined by the coverage, while the number of true \kmer{s} is proportional to the size of the genome $|\strname{S}|$ \cite{Conway2011}.
 
 Although modern sequencing machines generate a quality score associated with each base, it is not possible to know exactly what parts of the reads are erroneous, and so we cannot tell whether a \kmer should be added to the \dBG without more information. However, real \kmer{s} are expected to appear a number of times close to the sequencing coverage $c$, or a multiple of $c$ in case of repeats, whereas spurious \kmer{s} resulting from sequencing errors are commonly low-frequency or even unique \cite{Conway2011, Zhang2014, Ghosh2019}. Therefore, a natural way of filtering the \kmer{s} obtained from the reads is to discard those that have a low frequency. Hence we consider a \kmer to be a real \kmer \emph{iff} it occurs more than some threshold $t$, in which case we add it to the \dBG.
 
-\subsubsection{\kmer counting}
+\section{Counting \kmers}
 
-\changed{Counting \kmer{s} in a set of reads in a time- and space-efficient manner is, in itself, a challenging task, which is commonly performed as a preprocessing step to the \dBG construction \cite{Zhang2014}. Many different approaches have been proposed for achieving this task. 
+\changed{Counting \kmer{s} in a set of reads in a time- and space-efficient manner is a challenging task, commonly performed as a preprocessing step to the \dBG construction \cite{Zhang2014}, and for which many different approaches have been proposed. 
 
 Marçais \& Kingsford introduced \emph{Jellyfish} in 2001, a hashtable-based approach for \kmer counting that controls memory usage by identifying when the hashtable will grow beyond the available memory, in which case its contents are written to disk and the table cleared. It can, then, merge the partial hashtables saved in disk storage \cite{Marcais2011}.
 
 \emph{BFCounter}, introduced by Melsted \& Pritchard, also uses a hashtable to track \kmer counts, but it uses a Bloom Filter (BF) to skip unique \kmer{s}. It does two passes over the sequencing reads, identifying the \kmer{s} that appear more than once by verifying if they were already introduced into a BF on the first pass, and then using a hashtable to count only the nonunique \kmer{s} on the second \cite{Melsted2011}.
 
-Rizk \emph{et al.} later introduced \emph{DSK}, which makes use of disk storage to track \kmer counts, allowing for low memory usage, and allows for controlling how much disk storage is needed by sacrificing processing time. It separates the \kmer{s} from the reads into a set of files whose number and size is determined by the target memory and disk usage given as an input. The \kmer{s} in each file are, then, counted using a hashtable \cite{Rizk2013}.
+Rizk \emph{et al.} later introduced \emph{DSK}, which makes use of disk storage to track \kmer counts thus saving main memory. The tool allows for controlling how much disk storage is used by sacrificing some processing time. It separates the \kmer{s} from the reads into a set of files whose number and size is determined by the target memory and disk usage given as an input. The \kmer{s} in each file are then counted using a hashtable \cite{Rizk2013}.
 
-Similarly to \emph{BFCounter}, \emph{Turtle} uses a BF to skip unique \kmer{s}, it then adds \kmer occurrences to an array with a fixed length. Once the array is filled, it is sorted such that occurrences of the same \kmer appear next to each other. These occurrences can, then, be merged into a single array entry containing the number of times that \kmer occurred, freeing memory for the process to continue. For the cases where the number of frequent \kmer{s} is too large to fit into the array, they also introduce a probabilistic approach using counting BF's \cite{Roy2014}.
+Similar to \emph{BFCounter}, \emph{Turtle} uses a BF to track \kmer{s} appearing at least twice, adding \kmer occurrences to fixed-length array. Once the array is filled, it is sorted such that occurrences of the same \kmer appear next to each other. These occurrences can then be merged into a single array entry containing the number of times that \kmer occurred, freeing memory for the process to continue. For cases where the number of frequent \kmer{s} is too large to fit into the array, they also introduce a probabilistic approach using counting BF's \cite{Roy2014}.
 
-Zhang \emph{et al.} use a \cm sketch (discussed in Section~\ref{sec:countmin}) to develop a probabilistic approach to \kmer counting that incurs in some miscount rate, showing that this rate can be constrolled by increasing the memory requirements of the sketch. They also show that, despite the miscount rate, the abundance profiles generated by \emph{khmer} could be used for measuring sequencing error profiles and for performing read trimming \cite{Zhang2014}.
+Zhang \emph{et al.} use a \cm sketch (discussed in Section~\ref{sec:countmin}) as a probabilistic approach to \kmer counting that incurs in some miscount rate. They show that this rate can be controlled by increasing the memory requirements of the sketch. They also show that, despite the miscount rate, the abundance profiles generated by \emph{khmer} could be used for measuring sequencing error profiles and for performing read trimming \cite{Zhang2014}.
 
-It is also possible to introduce \kmer counting directly as a part of the \dBG construction. \emph{FastEtch} is an assembler which uses a small \cm sketch to allow for the online construction of the \dBG by filtering spurious \kmer{s} based on abundance. As \kmer{s} are taken from the reads, they are used to update counters on the \cm sketch. Once a threshold is reached, the \kmer is added to a hashtable-based exact representation of the \dBG. Because the authors use a small \cm sketch, many collisions are expected to occur and many false positives are expected to go through. They propose two methods for reducing these occurrences which are based on keeping track of how many \kmer{s} have been added to the \dBG due the count of any individual bucket of the \cm. Once a bucket has caused too many \kmer{s} to be inserted into the graph, it is reset. They show that the two assemblers developed offer a good time-memory-quality tradeoff \cite{Ghosh2019}.}
+It is also possible to introduce \kmer counting directly as a part of the \dBG construction. \emph{FastEtch} is an assembler which uses a small \cm sketch to allow for the online construction of the \dBG by filtering spurious \kmer{s} based on abundance. As \kmer{s} are taken from the reads, they are used to update counters on the \cm sketch. Once a threshold is reached, the \kmer is added to a hashtable-based exact representation of the \dBG. Because the authors use a small \cm sketch, many collisions are expected to occur and many false positives are expected to go through. They propose two methods for reducing these occurrences which are based on keeping track of how many \kmer{s} have been added to the \dBG due the count of any individual bucket of the \cm. Once a bucket has caused too many \kmer{s} to be inserted into the graph, it is reset. They present two variations of an assembler that offer a good time-memory-quality tradeoff \cite{Ghosh2019}.}
 
-\subsection{\dBG representation}
+\section{\dBG representation}
 \label{subsec:dBG-representation}
 
-A \dBG can be represented either by its set of nodes (\kmer{s}) or edges ($(k+1)$-mers) equivalently, as one can be derived from the other. Therefore, a structure that can determine if a given node $x$ is a member of $G$ can represent the \dBG. Conway \& Bromage showed that the lower bound on the space required to \emph{exactly} represent these \keyterm{membership data structures} (MDS's) is $\Omega(n \log n)$, with $n=|V(G)|$ \cite{Conway2011}. \changed{They, then, achieve a succint representation of the graph by storing its edges in a compressed bitmap, allowing the graph to be represented using approximately 28~bits per edge \cite{Conway2011}.}
+A \dBG can be represented either by its set of nodes (\kmer{s}) or edges ($(k+1)$-mers) equivalently, as one can be derived from the other. Therefore, a structure that can determine if a given node $x$ is a member of $G$ can represent the \dBG. Conway \& Bromage showed that the lower bound on the space required to \emph{exactly} represent these \keyterm{membership data structures} (MDS's) is $\Omega(n \log n)$, with $n=|V(G)|$ \cite{Conway2011}. \changed{They achieve a succinct representation of the graph by storing its edges in a compressed bitmap, allowing the graph to be represented using approximately 28~bits per edge \cite{Conway2011}.}
 
 In order to further improve space-efficiency, new representations were created that trade deterministic exactness for a probabilistic approach. Pell \emph{et al.} showed that a probabilistic representation based on a BF could accuratly represent a \dBG with as little as 4~bits per \kmer \changed{while keeping false positive rates at $15\%$ or lower} \cite{Pell2012}.
 
 However, Bowe \emph{et al.} \cite{Bowe2012} and Chikhi \& Rizk \cite{Chikhi2013} independently observed that giving up deterministic exactness isn't the only option for obtaining better space-efficiency, introducing two new representations that use $O(n)$ and $O(n \log k)$ bits, respectively, and allow for an exact traversal of the \dBG from a starting set of known member nodes. This is possible due to the fact that a \dBG is not queried for membership of random nodes, but rather for potential neighbors of nodes already known to be in the graph. As such, the structures designed by the two groups do not offer a deterministically exact membership query operation, instead offering a neighborhood query operation that is exact for the members of the graph \cite{Bowe2012, Chikhi2013}. Chikhi \emph{et al.} later named this new form of representation a \keyterm{Navigational Data Structure} (NDS) and showed that the lower bound on the number of bits required to exactly represent a \dBG with an NDS is $3.24n$ \cite{Chikhi2014}.
 
-\changed{Chikhi \& Rizk's implementation follows Pell \emph{et al.}'s approach \cite{Pell2012} by using a BF to store the nodes in the graph. However, they use a separate standard set to exactly store only the false positive neighbors of true \kmer{s}, which they call \emph{cFP} for critical false positives, such that a \kmer is considered to be represented in the graph \emph{iff} it is considered present in the BF, but is not in the set of \emph{cFP}. This allows them to construct an exact representation of the \dBG in $13.2$~bits per \kmer \cite{Chikhi2013}.
+\changed{Chikhi \& Rizk's implementation follows Pell \emph{et al.}'s approach \cite{Pell2012} by using a BF to store the nodes in the graph. However, they use a separate standard set to exactly store only the false positive neighbors of true \kmer{s}, which they call \emph{cFP} for critical false positives, such that a \kmer is considered to be represented in the graph iff it is considered present in the BF, but not in the \emph{cFP} set. This allows them to construct an exact representation of the \dBG in $13.2$~bits per \kmer \cite{Chikhi2013}.
 
 Salikhov \emph{et al.} expanded on the work of Chikhi \& Rizk by storing the \emph{cFP}'s in a BF. Because this can incur in some true positives being considered false positives, they use a second BF to store these `false false positives'. They show that, in theory, they could achieve a representation of the \dBG using $8.45$~bits per \kmer using an infinite set of BF's. In practice, however, they use a finite set of filters, with a set of \emph{cFP}'s that are not resolved by those filters. They show that using just two filters is enough to resolve $95\%$ of queries without using the set, and four filters resolve over $99\%$ of queries. This allows them to improve on the results by Chikhi \& Rizk \cite{Chikhi2013} by constructing a representation that needs only between $8.5$ and $9$~bits per \kmer \cite{Salikhov2014}.}
 
@@ -98,7 +98,7 @@ Beyond the distinction between probabilistic and exact, and MDSs and NDSs, there
 % In sections \ref{sec:debruijncountmin} and \ref{sec:debruijnhashtable} we will introduce two new NDS's. \asq{É necessário reiterar
 % os objetivos das duas estrutas aqui, visto que isso já seria feito na introdução e é feito nas próprias sessões dedicadas a cada estrutura?}\paguso{até o momento, acho que não.}
 
-\subsubsection{Operations}
+\section{\dBG operations}
 \label{subsubsec:dbg-operations}
 
 Chikhi \emph{et al.} \cite{Chikhi2019} present the following set of operations common to many data structures for representing a \dBG.

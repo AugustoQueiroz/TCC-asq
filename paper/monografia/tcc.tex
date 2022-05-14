@@ -40,7 +40,7 @@
 
 \newcommand{\tochange}[1]{\color{red} #1 \color{black}}
 \newcommand{\toconsider}[1]{\color{blue} #1 \color{black}}
-\newcommand{\changed}[1]{\color{teal} #1 \color{black}}
+\newcommand{\changed}[1]{#1}%{\color{teal} #1 \color{black}}
 \newcommand{\asq}[1]{\color{red}$\rightarrow$ asq says: #1 $\leftarrow$ \color{black}}
 \newcommand{\paguso}[1]{\color{magenta}$\rightarrow$ paguso says: #1 $\leftarrow$ \color{black}}
 \newcommand{\remove}[2][]{\color{magenta}{\sout{#2}(\textit{#1})}\color{black}}
@@ -63,28 +63,29 @@
     \frontmatter
     \frontpage
     \presentationpage
-    \begin{dedicatory}
+    %\begin{dedicatory}
+    %
+    %\end{dedicatory}
 
-    \end{dedicatory}
-
-    \acknowledgements
+    %\acknowledgements
 
 
 
-    \begin{epigraph}[<nota>][<autor>]
+    %\begin{epigraph}[<nota>][<autor>]
+    %\end{epigraph}
 
-    \end{epigraph}
+\linenumbers
+\doublespacing
 
-    \include{resumo}
+    
     \include{abstract}
+    %\include{resumo}
 
     \tableofcontents
     \listoffigures
     % \listoftables
 
     \mainmatter
-	\linenumbers
-	\doublespacing
     \include{chapter1}
     \include{chapter2}
     \include{chapter3}
