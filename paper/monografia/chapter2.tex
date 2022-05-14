@@ -16,6 +16,10 @@
         \2 Online counting $\rightarrow$ Filtering $\rightarrow$ Construction of \dBG
 \end{outline}
 
+\section{Notation}
+
+Throughout this work, we use lower-case symbols, such as $t$ and $c$, to represent scalar values. Uppercase symbols, such as $\strname{X}$ and $\strname{Y}$, represent strings. Finally, calligraphic uppercase symbols, such as $\readset$, are used to represent sets. Strings and sets are $0$-indexed, and the notation $X[i:j]$ represents the substring of $X$ from position $i$ up to, but not including, position $j$. When used between two string, or a string and a character, $\strname{X} \cdot \strname{Y}$ represents the concatenation of $\strname{X}$ and $\strname{Y}$.
+
 \section{\dBG{s}}
 \label{sec:dBG}
 
@@ -59,7 +63,7 @@ To deal with reverse complements, reads are processed twice, once in each direct
 
 Another difficulty of using a \dBG to represent DNA data is dealing with sequencing errors. During the sequencing process, there is a small error rate associated with reading any base from \strname{S} (0.1\%--1\% per base in Illumina \cite{Metzker2010}). As a result, many of the \kmer{s} extracted from the reads in \readset are erroneous. As discussed by Conway \& Bromage, this causes the number of spurious \kmer{s} to grow proportionally to the number of bases in the reads $|\readset|=\sum_{\strname{X}_i \in \readset} |\strname{X}_i|$, determined by the coverage, while the number of true \kmer{s} is proportional to the size of the genome $|\strname{S}|$ \cite{Conway2011}.
 
-Although modern sequencing machines generate a quality score associated with each base, it is not possible to know exactly what parts of the reads are erroneous, and so we cannot tell whether a \kmer should be added to the \dBG without more information. However, real \kmer{s} are expected to appear a number of times close to the sequencing coverage $c$, or a multiple of $c$ in case of repeats, whereas spurious \kmer{s} resulting from sequencing errors are commonly low-frequency or even unique \cite{Conway2011} \cite{Zhang2014} \cite{Ghosh2019}. As such, a natural way of filtering the \kmer{s} obtained from the reads is to discard those that have a low frequency. Hence we consider a \kmer to be a real \kmer iff it occurs more than some threshold $t$, in which case added to the \dBG.
+Although modern sequencing machines generate a quality score associated with each base, it is not possible to know exactly what parts of the reads are erroneous, and so we cannot tell whether a \kmer should be added to the \dBG without more information. However, real \kmer{s} are expected to appear a number of times close to the sequencing coverage $c$, or a multiple of $c$ in case of repeats, whereas spurious \kmer{s} resulting from sequencing errors are commonly low-frequency or even unique \cite{Conway2011, Zhang2014, Ghosh2019}. As such, a natural way of filtering the \kmer{s} obtained from the reads is to discard those that have a low frequency. Hence we consider a \kmer to be a real \kmer iff it occurs more than some threshold $t$, in which case added to the \dBG.
 
 Counting \kmer{s} in a set of reads in a time- and space-efficient manner is, in itself, a challenging task, which is commonly performed as a preprocessing step to the \dBG construction \cite{Zhang2014}. Some assemblers, however, introduce \kmer counting as a part of the \dBG construction, such as the \emph{FastEtch} assembler, which uses a \cm sketch (discussed in Section~\ref{sec:countmin}) to do so \cite{Ghosh2019}.
 
@@ -91,14 +95,14 @@ Beyond the distinction between probabilistic and exact, and MDSs and NDSs, there
 \subsubsection{Operations}
 \label{subsubsec:dbg-operations}
 
-Chikhi \emph{et al.} \cite{Chikhi2019} present the following set of operations common to many data structures for representing a \dBG \asq{Na verdade, eles falam especificamente de "set of \kmer{s}". Sendo que, no final das contas, um \dBG não deixa de ser um "set of \kmer{s}"}.
+Chikhi \emph{et al.} \cite{Chikhi2019} present the following set of operations common to many data structures for representing a \dBG.
 
 \begin{enumerate}
   \item \emph{Construction} of the data structure
   \item \emph{Insertion} of a new \kmer
   \item \emph{Deletion} of an existing \kmer.
   \item \emph{Membership query}: Given a \kmer $X$, returns true iff $X \in G$
-  \item \emph{Forward neighbor query}: Given a \kmer $X$ and a base $a$, returns true iff $X[1:k] \cdot a \in G$\footnote{We use $\cdot$ to represent the concatenation operation, and the notation $x:y$ represents the range $[x,y)$}.\paguso{rever esser índices, está contando o último índice? Essa notação deve ser introduzida no Cap 2}
+  \item \emph{Forward neighbor query}: Given a \kmer $X$ and a base $a$, returns true iff $X[1:k] \cdot a \in G$
   \item \emph{Backward neighbor query}: Given a \kmer $X$ and a base $a$, return true iff $a \cdot X[0:k-1] \in G$.
 \end{enumerate}
 

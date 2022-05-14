@@ -30,7 +30,7 @@ Although we have satisfactorily achieved the main goals proposed for this work, 
 
 \paragraph*{Comparing our methods to similar work}
 
-It would be important to compare the results obtained in this project to related work more directly. In particular, we would like to show that the \cm{-based} filter used in \emph{FastEtch} is less effective in filtering spurious \kmer{s} than the pipeline we introduce, based on count and traversal. We would also like to show that despite providing a slightly less succinct \dBG representation in the form of a \dBHT, this structure has better performance than Bloom Filter-based representations\paguso{citar alguma referência}, due to reducing the number of potential neighbor queries, and the number of hashing functions to only one in practice\paguso{the fingerprint is obtained from the fibhash}.
+It would be important to compare the results obtained in this project to related work more directly. In particular, we would like to show that the \cm{-based} filter used in \emph{FastEtch} \cite{Ghosh2019} is less effective in filtering spurious \kmer{s} than the pipeline we introduce, based on count and traversal. We would also like to show that despite providing a slightly less succinct \dBG representation in the form of a \dBHT, this structure has better performance than Bloom Filter-based representations, e.g. the one introduced by Pell \emph{et al.} \cite{Pell2012}, due to reducing the number of potential neighbor queries, and the number of hashing functions to only one in practice.
 
 \paragraph*{Generating contigs and N50 score for the \dBHT}
 
@@ -40,7 +40,7 @@ A natural next step is to use the \dBHT to generate maximal contigs and, from th
 \paragraph*{Optimizing parts of the implementation}
 
 We have implemented the methods described herein in C-language for maximum performance. However, a few things can still be streamlined and optimized.
-For instance, we have used a queue and a set to store respectively the nodes to be visited and the ones already visited during the \dBCM traversal. In practice, this approach is not interesting as it ultimately requires representing the \dBG in memory as a set, in parallel to the succinct representation being constructed, which is prohibitive for larger genomes. It would be interesting to see how using the \dBHT itself, as it is being constructed, as the set of visited nodes would affect its final result. Because of false positives, this could result in true nodes not being visited, and therefore not represented in the graph. \paguso{você não vai querer uma discussão muito longa sobre o que não está tão bem.}
+For instance, we have used a queue and a set to store respectively the nodes to be visited and the ones already visited during the \dBCM traversal. In practice, this approach is not interesting as it ultimately requires representing the \dBG in memory as a set, in parallel to the succinct representation being constructed, which is prohibitive for larger genomes. It would be interesting to see how using the \dBHT itself, as it is being constructed, as the set of visited nodes would affect its final result. Because of false positives, this could result in true nodes not being visited, and therefore not represented in the graph. 
 
 \medskip
 
