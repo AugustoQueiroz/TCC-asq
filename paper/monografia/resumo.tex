@@ -1,4 +1,13 @@
 \resumo
-\begin{keywords}
 
+\textbf{Contexto} Desde a introdução das tecnologias de sequenciamento de segunda geração, melhorar a eficiência da montagem de genomas tem sido um objetivo importante visando alcançar o alto rendimento do sequenciamento. Um gargalo no processo de montagem é a quantidade de memória necessária para representar um Grafo de de Bruijn (GdB), uma estrutura prevalente e essencial em montadores de genomas modernos. Um aspecto dessa busca por menor uso de memória é o desenvolvimento de estruturas de dados capazes de armazenar eficientemente um conjunto de cadeias de caracteres de tamanho $k$, chamadas de \kmer{s}. Outro aspecto importante é a filtragem das leituras produzidas pelo sequenciamento para evitar inserir no GdB nós que representam erros de sequenciamento.
+
+\textbf{Objetivos} Nesse trabalho, nós propomos uma \emph{pipeline} baseada em duas novas representações para GdB's que tem como alvo filtrar os \kmer{s} obtidos das leituras baseado em frequência e conectividade à outros \kmer{s}, e representar apenas os \kmer{s} de alta-qualidade de forma sucinta.
+
+\textbf{Resultados} Nós mostramos que o \dBCM, uma representação baseada em um \emph{sketch} \cm, pode ser usada para filtrar efetivamente mais de $80\%$ dos \kmer{s} espúrios das leituras baseado em contagem apenas, e que pode, então, ser navegada para remover parte dos \kmer{s} errôneos restantes, filtrando mais de $95\%$ dos \kmer{s} espúrios no total. Nós então representamos os \kmer{s} restantes em uma \dBHT, uma representação probabilistica baseada em uma hashtable que requer entre $9$ e $16$~bits por \kmer, dependendo da taxa desejada de falsos positivos, enquanto permite a inserção e consulta em tempo quase constante devido à utilização de uma única função de \emph{hashing}. Nós mostramos que, mesmo com $9$~bits por \kmer, o número de nós falsos positivos constitui menos do que $16\%$ do grafo resultante.
+
+\textbf{Conclusão} Nós mostramos que a filtragem baseada em conectividade através da travessia do grafo é muito efetiva para filtrar \kmer{s} espúrios das leituras além da filtragem baseada em frequência, e pode ser realizada eficientemente na \dBCM. Nós mostramos também que a \dBHT oferece um bom \emph{trade off} entre uso de memória e tempo de inserção e consulta.
+
+\begin{keywords}
+Estruturas de dados sucintas, Grafos de de Bruijn, Sequenciamento Genético, \kmer{s}, \emph{sketching}, Hashtable, \cm
 \end{keywords}
