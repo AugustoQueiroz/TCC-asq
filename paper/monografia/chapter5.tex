@@ -9,13 +9,13 @@ The experimental analysis described in Chapter~\ref{chap:results} allows us to c
 \paragraph*{\cm{-based} \kmer counting can be used to filter spurious \kmer{s} from sequencing reads}
 
 We start by noticing that our \dBCM variation of the \cm sketch can be used to filter spurious \kmers resulting from sequencing errors.
-We expand on the results presented by Zhang \emph{et al.} \cite{Zhang2014} to show that, despite overcounting, we can still filter out most (over $80\%$) of spurious \kmer{s} based on the count estimate from a \cm sketch that has fewer cells than the number of distinct \kmer{s} in the reads, and uses only $16$ bits per cell. These results are similar to what \emph{khmer} achieves through iteratively truncating the reads at the first low-frequency \kmer \cite{Zhang2014}, i.e. \emph{read trimming}. However, filtering directly from the counts only requires that the reads be processed once.
+We expand on the results presented by Zhang \emph{et al.}, with \emph{khmer}, \cite{Zhang2014} to show that, despite overcounting, we can still filter out most (over $80\%$) of spurious \kmer{s} based on the count estimate from a \cm sketch that has fewer cells than the number of distinct \kmer{s} in the reads, and uses only $16$ bits per cell. These results are similar to what \emph{khmer} achieves through iteratively truncating the reads at the first low-frequency \kmer \cite{Zhang2014}, i.e. \emph{read trimming}. However, filtering directly from the counts only requires that the reads be processed once.
 
 \paragraph*{Filtering through traversal is very effective}
 
 We have also shown that traversing the \dBG generated from the high-frequency \kmer{s} further improves filtering of spurious \kmer{s} without affecting the number of real \kmer{s} represented. Therefore, although Ghosh \& Kalyanaraman \cite{Ghosh2019} present a framework for using the \cm sketch for online filtering of spurious \kmer{s} that allows the sketch to be considerably smaller, reducing the size of the \cm sketch much further than presented here hinders its ability to be successfully navigated, losing a very efficient second filter that removed nearly $98\%$ of the remaining spurious \kmer{s} after count-based filtering. This would decrease memory requirement during processing of the reads, but results in a less succinct final representation of the \dBG.
 
-\paragraph*{Storing outedges improves traversal}
+\paragraph*{Storing outedges improves traversal when compared to querying all possible neighbors}
 
 We also see that, for both data structures used, the number of outedges stored for each node in the \dBG is low, with the vast majority having only one recorded outedge. Without using the outedges, and querying all four possible neighbors of a given node, we would need to query between two to four times as many \kmer{s}, just from the nodes represented in the \dBG. Storing the outedges, even with some chance of false positives, can therefore decrease the impact of the false positive rate associated with the membership query of either structure by preventing false \kmer{s} from even being queried. Moreover, by reducing the number of queries, storing the set of outedges also improves time performance of traversals or related operations.
 
@@ -26,11 +26,11 @@ These results are comparable to current \dBG representations, that span from $4$
 
 \section{Future Work}
 
-Although we have satisfactorily achieved the main goals proposed for this work, we have identified a few points that would benefit from further work. 
+Beyond successfully achieving the main goals for this work, we have also identified a few points that would benefit from further work.
 
 \paragraph*{Comparing our methods to similar work}
 
-It would be important to compare the results obtained in this project to related work more directly. In particular, we would like to show that the \cm{-based} filter used in \emph{FastEtch} \cite{Ghosh2019} is less effective in filtering spurious \kmer{s} than the pipeline we introduce, based on count and traversal. We would also like to show that despite providing a slightly less succinct \dBG representation in the form of a \dBHT, this structure has better performance than Bloom Filter-based representations, e.g. the one introduced by Pell \emph{et al.} \cite{Pell2012}, due to reducing the number of potential neighbor queries, and the number of hashing functions to only one in practice.
+It would be important to compare the results obtained in this project to related work more directly. In particular, we hypothesize that the \cm{-based} filter used in \emph{FastEtch} \cite{Ghosh2019}, because of its very small size, is less effective in filtering spurious \kmer{s} than the pipeline we introduce, based on count and traversal. We also hypothesize that despite providing a slightly less succinct \dBG representation in the form of a \dBHT, this structure has better performance than Bloom Filter-based representations, e.g. the one introduced by Pell \emph{et al.} \cite{Pell2012}, due to reducing the number of potential neighbor queries, and the number of hashing functions to only one in practice.
 
 \paragraph*{Generating contigs and N50 score for the \dBHT}
 

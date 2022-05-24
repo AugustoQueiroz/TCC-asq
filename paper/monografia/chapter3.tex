@@ -2,7 +2,7 @@
 
 In this chapter, we detail a novel pipeline for constructing a succint \dBG representation directly from the unprocessed sequencing reads, and two new \dBG representations. The first is capable of performing \kmer counting and count-based filtering by sacrificing space efficiency, while the other is a succint hashtable-based representation. Both these data structures offer probabilistic membership query operation and, by associating each \kmer with a set of outedges, a probabilistic neighborhood query that is expected to perform better than using the membership query for all possible neighboring \kmer{s}.
 
-\section{A NDS pipeline for online construction of \dBG{s}}\label{sec:pipeline}
+\section{A navigational data structure-based pipeline for online construction of \dBG{s}}\label{sec:pipeline}
 
 We propose two new probabilistic NDS-based representations for the \dBG: the \keyterm{\dB \cm} \dBCM (Section~\ref{sec:debruijncountmin}), and the \keyterm{\dB Hashtable} \dBHT (Section~\ref{sec:debruijnhashtable}). The \dBCM aims at performing online \kmer counting in a structure that can also be traversed through the use of a probabilistic neighborhood query in a space-efficient manner. It is constructed online as the reads are processed, and can be navigated, allowing for further processing of the \dBG. The \dBHT forgoes \kmer counting and any form of filtering in exchange for improved space-efficiency in a hashtable-based representation. Both structures are designed for improved navigability on the graph by storing a set of outgoing edges (outedges, for short) with each \kmer, allowing for constant time neighborhood queries. 
 
@@ -236,7 +236,7 @@ This structure can be traversed in a breadth-first order from an initial set of 
 	\Return{$Q$}
 \end{algorithm}
 
-\paragraph*{Selecting the starting set $\strsetname{S}$ of \kmer{s} for traversal} Ideally, only the first \kmer from the original sequence $S$ is needed to perform the traversal of the grap, but unfortunately it is not possible to determine where in the original sequence a read was taken from. One option is to use all the \kmer{s} from the reads that are found to be in the graph, but we argue that this set is unnecessarily large. We can instead reduce the size of $\strsetname{S}$ by only considering the \kmer{s} that are at the start of their reads since the following \kmers would be reachable from it anyway.
+\paragraph*{Selecting the starting set $\strsetname{S}$ of \kmer{s} for traversal} Ideally, only the first \kmer from the original sequence $S$ is needed to perform the traversal of the graph, but unfortunately it is not possible to determine where in the original sequence a read was taken from. One option is to use all the \kmer{s} from the reads that are found to be in the graph, but we argue that this set is unnecessarily large. We can instead reduce the size of $\strsetname{S}$ by only considering the \kmer{s} that are at the start of their reads since the following \kmers would be reachable from it anyway.
 
 \section{The \dB Hashtable}
 \label{sec:debruijnhashtable}
