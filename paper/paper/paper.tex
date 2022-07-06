@@ -1,0 +1,84 @@
+\documentclass{article}
+
+\usepackage[ruled]{algorithm2e}
+\SetKwInOut{Input}{Input}\SetKwInOut{Output}{Output}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{xspace}
+\usepackage{xcolor}
+\usepackage{setspace}
+\usepackage{lineno}
+\usepackage{outlines}
+\usepackage[normalem]{ulem}
+\usepackage{paralist}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
+
+\newcommand{\prob}{\ensuremath{\mathrm{Pr}}}
+\newcommand{\dB}{de~Bruijn\xspace}
+\newcommand{\dBG}{de~Bruijn graph\xspace}
+\newcommand{\dBCM}{DBCM\xspace}
+\newcommand{\dBHT}{DBHT\xspace}
+\newcommand{\cm}{CountMin\xspace}
+\newcommand{\kmer}{\mbox{$k$-mer}\xspace}
+\newcommand{\kmers}{\mbox{$k$-mers}\xspace}
+\newcommand{\chr}[1]{\ensuremath{\mathtt{#1}}}
+\newcommand{\A}{\chr{A}}
+\newcommand{\C}{\chr{C}}
+\newcommand{\G}{\chr{G}}
+\newcommand{\T}{\chr{T}}
+\newcommand{\keyterm}[1]{\textit{\textbf{#1}\/\xspace}}
+\newcommand{\str}[2]{\ensuremath{#1_0\cdots#1_{#2-1}}}
+\newcommand{\strname}[1]{\ensuremath{\uppercase{#1}}}
+\newcommand{\strdef}[2]{\ensuremath{\strname{#1}=\str{#1}{#2}}}
+\newcommand{\strslice}[3]{\ensuremath{\strname{#1}[#2:#3]}}
+\newcommand{\strsetname}[1]{\ensuremath{\mathcal{\uppercase{#1}}}}
+\newcommand{\mega}{\ensuremath{\mathrm{M}}}
+\newcommand{\kilo}{\ensuremath{\mathrm{K}}}
+
+\newcommand{\todo}[2][]{\color{red} #2 \color{black}}
+\newcommand{\tochange}[1]{\color{red} #1 \color{black}}
+\newcommand{\toconsider}[1]{\color{blue} #1 \color{black}}
+\newcommand{\changed}[1]{#1}%{\color{teal} #1 \color{black}}
+\newcommand{\asq}[1]{\color{red}$\rightarrow$ asq says: #1 $\leftarrow$ \color{black}}
+\newcommand{\paguso}[1]{\color{magenta}$\rightarrow$ paguso says: #1 $\leftarrow$ \color{black}}
+\newcommand{\remove}[2][]{\color{magenta}{\sout{#2}(\textit{#1})}\color{black}}
+\newcommand{\change}[3][]{\remove[#1]{#2}{#3}}
+\newcommand{\readset}{\strsetname{X}\xspace}
+
+
+\title{Space-efficient representation of \dBG{s} for sequence data streams}
+\author{Augusto Queiroz, Nivan Ferreira, Paulo Fonseca}
+
+\begin{document}
+	
+\maketitle
+
+\begin{abstract}
+\noindent\textbf{Background} A \dBG represents a given set of sequencing reads by the corresponding set of distinct \kmers, taking into account their overlaps, and have been used extensively for biological sequence assembly and analysis since the advent of second-generation sequencing technologies. However their construction time and memory cost remain two major bottlenecks, especially in the presence of sequencing errors.
+
+\noindent\textbf{Objectives} Our aim is to develop a \dBG representation that faithfully represents the \kmers in the reads, while leaving out spurious fragments due to sequencing errors. Not only we want our representation to have a good sensitivity to specificity ratio, but we also want it to be space and time-efficient in practice.
+
+\noindent\textbf{Methods} We propose a pipeline to build a navigational \dBG data structure using two consecutive probabilistic representations based on a \cm sketch and a hashtable. This pipeline filters \kmer{s} on the basis of frequency and connectivity to other \kmer{s}, representing only high-quality \kmer{s} in a succinct manner. It is suited for sequence reads fed as a data stream, dispensing with the usual preprocessing step of counting distinct \kmers. 
+
+\noindent\textbf{Results} We applied our method to \todo{real data} showing that it effectively filters-out \todo{over $80\%$} of spurious \kmer{s} based on frequency alone, and \todo{over $95\%$} of them in total using the connectivity-based traversal filter. Our representation ultimately requires between \todo{$9$ and $16$~bits} per \kmer, while allowing for constant time insertion and query. We show that even with \todo{$9$} bits per \kmer, the number of false positive \kmer{s} is still \todo{less than $16\%$} of the total graph. \todo{How about contigs?}
+
+\noindent\textbf{Conclusion} The proposed pipeline uses connectivity-based filtering of \kmers through \dBG traversal very effectively, leading to a streamlined data structure \todo{more conclusions}.
+
+\end{abstract}
+
+	
+\section{Introduction}
+
+\section{Methods}
+
+\section{Related work}
+
+\section{Results}
+
+\section{Discussion}
+	
+
+\end{document}
