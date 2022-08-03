@@ -49,73 +49,18 @@ size_t extendKMer(size_t currentKMer, char nextBase, int K) {
     return nextKMer & kmerMask;
 }
 
-size_t getDistinctKMerCount(struct DeBruijnCountMin* dBCM, std::set<size_t> startingKMers, int K, size_t presence_threshold) {
-    size_t distinctKMerCount = 0;
-
-    std::queue<size_t> toVisit;
-    std::set<size_t> visited;
-
-    // Load the starting kmers
-    for (auto starting_it = startingKMers.begin(); starting_it != startingKMers.end(); ++starting_it) {
-        toVisit.push(*starting_it);
-    }
-
-    size_t currentKMer = 0;
-    while (!toVisit.empty()) {
-        currentKMer = toVisit.front();
-        toVisit.pop();
-        visited.insert(currentKMer);
-
-        uint16_t queryResult = queryDeBruijnCountMin(dBCM, currentKMer);
-
-        if (queryResult >= presence_threshold) {
-            distinctKMerCount++;
-            uint8_t outEdges = queryResult >> 12;
-            if (outEdges & 0b1000) {
-                size_t nextKMer = extendKMer(currentKMer, 'A', K);
-                if (isMemberOfDeBruijnCountMin(dBCM, nextKMer, presence_threshold)) {
-                    if (visited.find(nextKMer) == visited.end())
-                        toVisit.push(nextKMer);
-                }
-            }
-            if (outEdges & 0b0100) {
-                size_t nextKMer = extendKMer(currentKMer, 'C', K);
-                if (isMemberOfDeBruijnCountMin(dBCM, nextKMer, presence_threshold)) {
-                    if (visited.find(nextKMer) == visited.end())
-                        toVisit.push(nextKMer);
-                }
-            }
-            if (outEdges & 0b0010) {
-                size_t nextKMer = extendKMer(currentKMer, 'G', K);
-                if (isMemberOfDeBruijnCountMin(dBCM, nextKMer, presence_threshold)) {
-                    if (visited.find(nextKMer) == visited.end())
-                        toVisit.push(nextKMer);
-                }
-            }
-            if (outEdges & 0b0001) {
-                size_t nextKMer = extendKMer(currentKMer, 'T', K);
-                if (isMemberOfDeBruijnCountMin(dBCM, nextKMer, presence_threshold)) {
-                    if (visited.find(nextKMer) == visited.end())
-                        toVisit.push(nextKMer);
-                }
-            }
-        }
-    }
-    
-    return distinctKMerCount;
-}
-
 int main(int argc, char** argv) {
-    if (argc != 7) {
-        std::cerr << "Usage: " << argv[0] << " <k> <sketch_file> <starting_kmers_file> <dbcm_output_file> <dbht_output_file> <presence_threshold>" << std::endl;
+    if (argc != 8) {
+        std::cerr << "Usage: " << argv[0] << " <k> <hash_table_size> <sketch_file> <starting_kmers_file> <dbcm_output_file> <dbht_output_file> <presence_threshold>" << std::endl;
         return 1;
     }
     size_t K = std::stoi(argv[1]);
-    std::string sketch_fp = argv[2];
-    std::ifstream startingKMersFile(argv[3]);
-    std::ofstream dBCMOutputFile(argv[4]);
-    std::ofstream dBHTOutputFile(argv[5]);
-    size_t presence_threshold = std::stoi(argv[6]);
+    size_t tableSize = std::stoi(argv[2]);
+    std::string sketch_fp = argv[3];
+    std::ifstream startingKMersFile(argv[4]);
+    std::ofstream dBCMOutputFile(argv[5]);
+    std::ofstream dBHTOutputFile(argv[6]);
+    size_t presence_threshold = std::stoi(argv[7]);
 
     // Load the sketch from the file
     std::cout << "Loading sketch from " << sketch_fp << std::endl;
@@ -127,25 +72,18 @@ int main(int argc, char** argv) {
     std::set<size_t> visited;
 
     // Load the starting kmers
-    std::set<size_t> startingKMers = loadStartingKMers(argv[3]);
+    std::set<size_t> startingKMers = loadStartingKMers(argv[4]);
     std::cout << "Loading starting kmers" << std::endl;
     for (auto starting_it = startingKMers.begin(); starting_it != startingKMers.end(); ++starting_it) {
         toVisit.push(*starting_it);
     }
 
-    // TODO - Need to get the size of the table from traversal, and not like this!!!
-    long double alpha = 0.8;
-    std::cout << "Getting distinct k-mer count (takes 1 traversal of the graph)" << std::endl;
-    auto start = std::chrono::high_resolution_clock::now();
-    size_t distinctKMerCount = getDistinctKMerCount(sketch, startingKMers, K, presence_threshold);
-    auto stop = std::chrono::high_resolution_clock::now();
-    std::cout << "Time to count nodes in graph (in microseconds): " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << std::endl;
-    size_t tableSize = (size_t) distinctKMerCount / alpha;
+    std::cout << tableSize << std::endl;
     struct HashTable* dBHT = createHashTable(tableSize);
 
     // Traversing the graph
     std::cout << "Traversing DBCM" << std::endl;
-    start = std::chrono::high_resolution_clock::now();
+    auto start = std::chrono::high_resolution_clock::now();
     size_t currentKMer = 0;
     while (!toVisit.empty()) {
         currentKMer = toVisit.front();
@@ -161,43 +99,39 @@ int main(int argc, char** argv) {
             if (outEdges & 0b1000) {
                 size_t nextKMer = extendKMer(currentKMer, 'A', K);
                 if (isMemberOfDeBruijnCountMin(sketch, nextKMer, presence_threshold)) {
-                    insertIntoHashTable(dBHT, nextKMer);
                     updateHashTableWithEdges(dBHT, currentKMer, 0b1000);
-                    if (visited.find(nextKMer) == visited.end())
+                    if (queryHashTable(dBHT, nextKMer))
                         toVisit.push(nextKMer);
                 }
             }
             if (outEdges & 0b0100) {
                 size_t nextKMer = extendKMer(currentKMer, 'C', K);
                 if (isMemberOfDeBruijnCountMin(sketch, nextKMer, presence_threshold)) {
-                    insertIntoHashTable(dBHT, nextKMer);
                     updateHashTableWithEdges(dBHT, currentKMer, 0b0100);
-                    if (visited.find(nextKMer) == visited.end())
+                    if (queryHashTable(dBHT, nextKMer))
                         toVisit.push(nextKMer);
                 }
             }
             if (outEdges & 0b0010) {
                 size_t nextKMer = extendKMer(currentKMer, 'G', K);
                 if (isMemberOfDeBruijnCountMin(sketch, nextKMer, presence_threshold)) {
-                    insertIntoHashTable(dBHT, nextKMer);
                     updateHashTableWithEdges(dBHT, currentKMer, 0b0010);
-                    if (visited.find(nextKMer) == visited.end())
+                    if (queryHashTable(dBHT, nextKMer))
                         toVisit.push(nextKMer);
                 }
             }
             if (outEdges & 0b0001) {
                 size_t nextKMer = extendKMer(currentKMer, 'T', K);
                 if (isMemberOfDeBruijnCountMin(sketch, nextKMer, presence_threshold)) {
-                    insertIntoHashTable(dBHT, nextKMer);
                     updateHashTableWithEdges(dBHT, currentKMer, 0b0001);
-                    if (visited.find(nextKMer) == visited.end())
+                    if (queryHashTable(dBHT, nextKMer))
                         toVisit.push(nextKMer);
                 }
             }
         }
     }
     dBCMOutputFile.close();
-    stop = std::chrono::high_resolution_clock::now();
+    auto stop = std::chrono::high_resolution_clock::now();
     std::cout << "Time to construct DBHT through traversal of DBCM (in microseconds): " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << std::endl;
 
     // Load the starting kmers
