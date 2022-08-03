@@ -1,3 +1,6 @@
 .DS_STORE
 src/build
 src/log
+.vscode/*
+*.bin
+**/__pycache__
