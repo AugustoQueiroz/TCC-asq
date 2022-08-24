@@ -25,7 +25,7 @@ void insertIntoHashTable(struct HashTable* hashTable, size_t key) {
 
     size_t index = hash;
     while (hashTable->table[index] & (1 << 7)) { // Dirty bit is set
-        if (((hashTable->table[index] >> 4) & 0b111) == fingerprint) {
+        if ((hashTable->table[index] & 0b111) == fingerprint) {
             // The fingerprint matches, so element is already in hashtable
             // printf("Element is already in hashtable\n");
             return;
@@ -39,7 +39,7 @@ void insertIntoHashTable(struct HashTable* hashTable, size_t key) {
         }
     }
 
-    size_t value = (1 << 7) | (fingerprint << 4);
+    size_t value = (1 << 7) | (fingerprint);
     // printf("%zu: %zu\n", index, value);
     hashTable->table[index] = value;
 }
@@ -49,7 +49,7 @@ void updateHashTableWithEdges(struct HashTable* hashTable, size_t key, uint8_t o
     size_t fingerprint = hashTable->fingerprintFunction(key);
 
     size_t index = hash;
-    while ((hashTable->table[index] & (1 << 7)) && ((hashTable->table[index] >> 4) & 0b111) != fingerprint) { // Dirty bit is set but fingerprint doesn't match
+    while ((hashTable->table[index] & (1 << 7)) && (hashTable->table[index] & 0b111) != fingerprint) { // Dirty bit is set but fingerprint doesn't match
         index = (index + 1) % (hashTable->indexSize);
         
         if (index == hash) { // Looped around the table
@@ -64,7 +64,7 @@ void updateHashTableWithEdges(struct HashTable* hashTable, size_t key, uint8_t o
         return;
     }
 
-    hashTable->table[index] |= outEdges;
+    hashTable->table[index] |= outEdges << 3;
     // printf("%zu: %hhu\n", index, hashTable->table[index]);
 }
 
@@ -73,7 +73,7 @@ uint8_t queryHashTable(struct HashTable* hashTable, size_t key) {
     size_t fingerprint = hashTable->fingerprintFunction(key);
 
     size_t index = hash;
-    while ((hashTable->table[index] & (1 << 7)) && ((hashTable->table[index] >> 4) & 0b111) != fingerprint) { // Dirty bit is set but fingerprint doesn't match
+    while ((hashTable->table[index] & (1 << 7)) && (hashTable->table[index] & 0b111) != fingerprint) { // Dirty bit is set but fingerprint doesn't match
         index = (index + 1) % (hashTable->indexSize);
         
         if (index == hash) { // Looped around the table
@@ -88,7 +88,9 @@ uint8_t queryHashTable(struct HashTable* hashTable, size_t key) {
         return -1;
     }
 
-    return hashTable->table[index] & 0b1111;
+    // TODO - In order to not use this shift, the usage of the result of this function needs to be update throughout the code
+    // So I'm keeping this shift here for now.
+    return (hashTable->table[index] >> 3) & 0b1111;
 }
 
 void saveHashTable(struct HashTable* dBHT, const char* outputFilePath) {

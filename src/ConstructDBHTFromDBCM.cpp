@@ -100,7 +100,7 @@ int main(int argc, char** argv) {
                 size_t nextKMer = extendKMer(currentKMer, 'A', K);
                 if (isMemberOfDeBruijnCountMin(sketch, nextKMer, presence_threshold)) {
                     updateHashTableWithEdges(dBHT, currentKMer, 0b1000);
-                    if (queryHashTable(dBHT, nextKMer))
+                    if (queryHashTable(dBHT, nextKMer) != (uint8_t) -1)
                         toVisit.push(nextKMer);
                 }
             }
@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
                 size_t nextKMer = extendKMer(currentKMer, 'C', K);
                 if (isMemberOfDeBruijnCountMin(sketch, nextKMer, presence_threshold)) {
                     updateHashTableWithEdges(dBHT, currentKMer, 0b0100);
-                    if (queryHashTable(dBHT, nextKMer))
+                    if (queryHashTable(dBHT, nextKMer) != (uint8_t) -1)
                         toVisit.push(nextKMer);
                 }
             }
@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
                 size_t nextKMer = extendKMer(currentKMer, 'G', K);
                 if (isMemberOfDeBruijnCountMin(sketch, nextKMer, presence_threshold)) {
                     updateHashTableWithEdges(dBHT, currentKMer, 0b0010);
-                    if (queryHashTable(dBHT, nextKMer))
+                    if (queryHashTable(dBHT, nextKMer) != (uint8_t) -1)
                         toVisit.push(nextKMer);
                 }
             }
@@ -124,7 +124,7 @@ int main(int argc, char** argv) {
                 size_t nextKMer = extendKMer(currentKMer, 'T', K);
                 if (isMemberOfDeBruijnCountMin(sketch, nextKMer, presence_threshold)) {
                     updateHashTableWithEdges(dBHT, currentKMer, 0b0001);
-                    if (queryHashTable(dBHT, nextKMer))
+                    if (queryHashTable(dBHT, nextKMer) != (uint8_t) -1)
                         toVisit.push(nextKMer);
                 }
             }
