@@ -18,9 +18,8 @@ parser.add_argument('-sg', '--synthetic-dataset-generator', type=str, help='The 
 
 # Experiment Parameters
 parser.add_argument('-D', type=int, nargs='+', help='The different values of D to be used', default=[8])
-w_group = parser.add_mutually_exclusive_group(required=True)
-w_group.add_argument('-W', type=int, nargs='+', help='The different values of W to be used')
-w_group.add_argument('-a', '--alpha', type=float, nargs='+', help='The different values of alpha to be used')
+parser.add_argument('-W', type=int, nargs='+', help='The different values of W to be used')
+parser.add_argument('-a', '--alpha', type=float, nargs='+', default=[0.8], help='The different values of alpha to be used')
 parser.add_argument('-k', type=int, nargs='+', help='The different values of k to be used')
 parser.add_argument('-t', '--presence-threshold', type=int, nargs='+', help='The presence threshold to be used', default=[1])
 
@@ -88,11 +87,12 @@ class ExperimentExecutables:
 class Experiment:
     valid_experiments = ['false_positive', 'false_negative']
 
-    def __init__(self, D, W, k, presence_threshold, steps, dataset_handler, executables: ExperimentExecutables):
+    def __init__(self, D, W, k, presence_threshold, alpha, steps, dataset_handler, executables: ExperimentExecutables):
         self.D = D
         self.W = W
         self.k = k
         self.presence_threshold = presence_threshold
+        self.alpha = alpha
         self.experiment_name = f'K{k}W{W}D{D}T{presence_threshold}'
         self.steps = steps
         self.dataset_handler = dataset_handler
@@ -125,7 +125,8 @@ class Experiment:
         os.system(run_command)
 
     def run_traversal(self):
-        run_command = f'{self.executables.traversal_executable} {self.k} {self.experiment_name}.sketch {self.experiment_name}.starting {self.experiment_name}.dbcm.results {self.experiment_name}.dbht.results {self.presence_threshold}'
+        # TODO - Traversal now is construction of DBHT, need to change things for better docs
+        run_command = f'{self.executables.traversal_executable} {self.k} {9000000 / self.alpha} {self.experiment_name}.sketch {self.experiment_name}.starting {self.experiment_name}.dbcm.results {self.experiment_name}.dbht.A{self.alpha}.results {self.presence_threshold}'
         print(f'Executing: {run_command}')
         os.system(run_command)
     
@@ -136,7 +137,7 @@ class ExperimentSet:
 
         executables = ExperimentExecutables(self.args.executable, self.args.counting_executable, self.args.navigation_executable)
 
-        variations = product(args.D, args.W, args.k, args.presence_threshold)
+        variations = product(args.D, args.W, args.k, args.presence_threshold, args.alpha)
         for variation in variations:
             experiment = Experiment(*variation, self.args.steps, dataset_handler, executables)
             self.experiments.append(experiment)

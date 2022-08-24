@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
     size_t readCount = 0;
     FILE* startingKMersFile = fopen("starting-kmers.txt", "w");
     while (scanf("%s", read) != EOF) {
-        printf("Current Read: %zu\r", readCount++);
+        //printf("Current Read: %zu\r", readCount++);
 
 		processRead(sketch, read, readLength, K, PRESENCE_THRESHOLD, startingKMersFile);
 		char* reverseComplementRead = reverseComplement(read);
